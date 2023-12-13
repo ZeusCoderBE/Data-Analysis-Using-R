@@ -5,15 +5,25 @@ date: "2023-12-13"
 output: html_document
 ---
 
+
+
 ```{r}
-install.packages("readr")
+
 
 ```
+
+
 ```{r}
 library(readr)
+library(dplyr)
+library(zoo)
+library(ggplot2)
 ```
 
-STEP-1 : Importing Diabetes Data from Google Drive
+
+## **STEP-1 : Importing Diabetes Data from Google Drive**
+
+
 ```{r}
 
 # Đọc file CSV trực tiếp từ đường link
@@ -22,32 +32,148 @@ diabetes <- read_csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtM
 diabetes
 
 ```
-STEP-2 : Exploratory Data Analysis on Diabetes Data
+## **Overall of dataset:** Dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
 
-Head : head()
+*Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiều thuộc tính liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về các cột:*
 
-Head is a function which returns the first 6 observations of the dataset.
+- **Mang thai:** Số lần người phụ nữ đã mang thai.
+
+- **Glucose:** Nồng độ glucose trong huyết tương của người phụ nữ.
+
+- **Huyết áp:** Đo huyết áp.
+
+- **Độ dày của da:** Độ dày của nếp gấp da ở cơ tam đầu.
+
+- **Insulin:** Nồng độ insulin trong máu.
+
+- **BMI (Chỉ số khối cơ thể):** Thước đo lượng mỡ trong cơ thể dựa trên chiều cao và cân nặng.
+
+- **Chức năng phả hệ bệnh tiểu đường:** Một chức năng cho thấy khả năng mắc bệnh tiểu đường dựa trên tiền sử gia đình.
+
+- **Tuổi:** Tuổi của người phụ nữ.
+
+- **Kết quả:** Biến mục tiêu cho biết người phụ nữ có mắc bệnh tiểu đường hay không (1 đối với bệnh nhân tiểu đường, 0 đối với người không mắc bệnh tiểu đường).
+
+
+## **STEP-2: Exploratory Data Analysis on Diabetes Data**
+
+### Head : head()
+
+*The `head` function returns the first 6 observations of the dataset.*
+
 ```{r}
 head(diabetes)
-```
-Summary : summary()
 
-Here we are computing the minimum,1st quartile, median, mean,3rd quartile and the maximum for all numeric variables of a dataset at once using summary() function.
+```
+### Summary: summary()
+
+*In this section, we compute the minimum, 1st quartile, median, mean, 3rd quartile, and the maximum for all numeric variables of the dataset at once using the `summary()` function.*
 
 ```{r}
 summary(diabetes)
-```
-Structure : str()
 
-The structure() function displays the internal structure of a data object.
+
+```
+
+### Structure: str()
+
+*In this section, the `str()` function is used to display the internal structure of a data object.*
+
 ```{r}
 str(diabetes)
 ```
-Column Names : colnames()
-The colname() function displays the column names available in the dataset.
+### Column Names: colnames()
+
+*The `colnames()` function displays the column names available in the dataset.*
 
 ```{r}
 colnames(diabetes)
+```
+### Check for Null Values
+
+*The following code checks for null values in each column.*
+
+```{r}
+na_count<-colSums(sapply(diabetes,is.na))
+na_count
+```
+### Handling Null Values
+
+*There are several ways to handle null values in a dataset.*
+
+*Fill in the missing values with the median value of each column.*
+
+
+```{r}
+diabetes_median <- diabetes %>%
+mutate_all(~ ifelse(is.na(.), median(., na.rm = TRUE), .))
+```
+
+*fill in the missing values with the mean value of each column*
+
+
+```{r}
+diabetes_mean <- diabetes %>%
+mutate_all(~ ifelse(is.na(.), mean(., na.rm = TRUE), .))
+```
+
+*fill in the missing values with the common value of each column*
+```{r}
+
+fill_mode <- function(x) {
+  mode_val <- names(sort(table(x), decreasing = TRUE))[1] 
+  x[is.na(x)] <- mode_val 
+  return(x)
+}
+
+diabetes_mode <- diabetes %>%
+mutate_all(fill_mode)
+
+
+```
+### Handling Outliers
+
+*Z-score (z-score standardization) is a method for handling outliers. It is calculated using the following formula:*
+
+$$
+Z = \frac{{X - \bar{X}}}{{\sigma}}
+$$
+
+*where:*
+
+- \( X \) is the specific value.
+
+- \( \bar{X} \) is the mean of the variable.
+
+- \( \sigma \) is the standard deviation of the variable.
+
+*This method helps standardize the data and identify values that deviate significantly from the mean.*
+
+
+```{r}
+
+diabetes_features <- diabetes %>%
+select(-'Outcome')
+diabetes_z <- scale(diabetes_features)
+diabetes_z
+```
+
+```{r}
+
+# Duyệt qua từng cột trong dataframe
+for (col in colnames(diabetes_z)) {
+  # Tạo dataframe từ cột đó
+  df <- data.frame(x = seq_along(diabetes_z[, col]), y = diabetes_z[, col])
+  
+  # Vẽ scatter plot bằng ggplot2 và sử dụng print để hiển thị
+  print(ggplot(df, aes(x = x, y = y, color = y)) +
+          geom_point() +
+          labs(x = "Index", y = paste("Z-score ", col), title = paste("Scatter Plot of Z-scores -", col))
+  )
+}
+
+
+
 ```
 
 
