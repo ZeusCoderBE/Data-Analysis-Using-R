@@ -9,14 +9,17 @@ output: html_document
 
 ```{r}
 
-
+install.packages("readr")
+install.packages("dylyr")
+install.packages("tidyr")
+install.packages("ggplot2")
 ```
 
 
 ```{r}
 library(readr)
 library(dplyr)
-library(zoo)
+library(tidyr)
 library(ggplot2)
 ```
 
@@ -151,29 +154,64 @@ $$
 
 
 ```{r}
-
-diabetes_features <- diabetes %>%
-select(-'Outcome')
-diabetes_z <- scale(diabetes_features)
+diabetes_z <- (diabetes - colMeans(diabetes)) / apply(diabetes, 2, sd)
 diabetes_z
+
 ```
+*Drawing scatter plot from the graph*
+```{r}
+
+melted_diabetes <- gather(diabetes_z, key = "Variable", value = "Z-score")
+
+# Vẽ scatter plot cho tất cả các cột
+ggplot(melted_diabetes, aes(x = Variable, y = `Z-score`, color = `Z-score`)) +
+  geom_point() +
+  labs(x = "Variable", y = "Z-score", title = "Scatter Plots of Z-scores") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Điều chỉnh góc và vị trí của chú thích trên trục x
+```
+*Drawing scatter plot from the graph, we observe that values >= 700 are outliers*
+
+
+```{r}
+# Lọc các giá trị Z-score mà tất cả đều nhỏ hơn 360
+diabetes_filter <- diabetes[rowSums(apply(diabetes_z, 2, function(x) abs(x) < 700)) == ncol(diabetes_z), ]
+
+# Hiển thị kích thước của bộ dữ liệu sau khi loại bỏ
+cat("Còn lại số lượng hàng và cột là:", dim(diabetes_filter))
+
+```
+### Correlation between Numeric Variables and Outcomes
+*Drawing boxplot*
+```{r}
+attach(diabetes)
+par(mfrow=c(2,4))
+boxplot(Pregnancies~Outcome, main="No. of Pregnancies vs. Diabetes", 
+        xlab="Outcome", ylab="Pregnancies",col="red")
+boxplot(Glucose~Outcome, main="Glucose vs. Diabetes", 
+        xlab="Outcome", ylab="Glucose",col="pink")
+boxplot(BloodPressure~Outcome, main="Blood Pressure vs. Diabetes", 
+        xlab="Outcome", ylab="Blood Pressure",col="green")
+boxplot(SkinThickness~Outcome, main="Skin Thickness vs. Diabetes", 
+        xlab="Outcome", ylab="Skin Thickness",col="orange")
+boxplot(Insulin~Outcome, main="Insulin vs. Diabetes", 
+        xlab="Outcome", ylab="Insulin",col="yellow")
+boxplot(BMI~Outcome, main="BMI vs. Diabetes", 
+        xlab="Outcome", ylab="BMI",col="purple")
+boxplot(DiabetesPedigreeFunction~Outcome, main="Diabetes Pedigree Function vs. Diabetes", xlab="Outcome", ylab="DiabetesPedigreeFunction",col="lightgreen")
+boxplot(Age~Outcome, main="Age vs. Diabetes", 
+        xlab="Outcome", ylab="Age",col="lightblue")
+box(which = "outer", lty = "solid")
+```
+
+## **STEP-3: Build Machine Learning Models**
+
+###Logarit Regression
 
 ```{r}
 
-# Duyệt qua từng cột trong dataframe
-for (col in colnames(diabetes_z)) {
-  # Tạo dataframe từ cột đó
-  df <- data.frame(x = seq_along(diabetes_z[, col]), y = diabetes_z[, col])
-  
-  # Vẽ scatter plot bằng ggplot2 và sử dụng print để hiển thị
-  print(ggplot(df, aes(x = x, y = y, color = y)) +
-          geom_point() +
-          labs(x = "Index", y = paste("Z-score ", col), title = paste("Scatter Plot of Z-scores -", col))
-  )
-}
-
-
-
 ```
+
+
+
 
 
