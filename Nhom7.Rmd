@@ -1,0 +1,53 @@
+---
+title: "ApDungCacMoHinhPhanTich"
+author: "Nhom7_DuLieuVeTieuDuong"
+date: "2023-12-13"
+output: html_document
+---
+
+```{r}
+install.packages("readr")
+
+```
+```{r}
+library(readr)
+```
+
+STEP-1 : Importing Diabetes Data from Google Drive
+```{r}
+
+# Đọc file CSV trực tiếp từ đường link
+diabetes <- read_csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
+# Hiển thị dữ liệu
+diabetes
+
+```
+STEP-2 : Exploratory Data Analysis on Diabetes Data
+
+Head : head()
+
+Head is a function which returns the first 6 observations of the dataset.
+```{r}
+head(diabetes)
+```
+Summary : summary()
+
+Here we are computing the minimum,1st quartile, median, mean,3rd quartile and the maximum for all numeric variables of a dataset at once using summary() function.
+
+```{r}
+summary(diabetes)
+```
+Structure : str()
+
+The structure() function displays the internal structure of a data object.
+```{r}
+str(diabetes)
+```
+Column Names : colnames()
+The colname() function displays the column names available in the dataset.
+
+```{r}
+colnames(diabetes)
+```
+
+
