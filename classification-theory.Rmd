@@ -28,6 +28,7 @@ diabetes
 ```{r cars}
 diabetes
 ```
+
 ```{r}
 str(diabetes)
 ```
