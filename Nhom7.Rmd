@@ -5,15 +5,28 @@ date: "2023-12-13"
 output: html_document
 ---
 
-```{r}
-install.packages("readr")
 
+
+```{r}
+
+install.packages("readr")
+install.packages("dylyr")
+install.packages("tidyr")
+install.packages("ggplot2")
 ```
+
+
 ```{r}
 library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 ```
 
-STEP-1 : Importing Diabetes Data from Google Drive
+
+## **STEP-1 : Importing Diabetes Data from Google Drive**
+
+
 ```{r}
 
 # Đọc file CSV trực tiếp từ đường link
@@ -22,32 +35,154 @@ diabetes <- read_csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtM
 diabetes
 
 ```
-STEP-2 : Exploratory Data Analysis on Diabetes Data
+## **Overall of dataset:** Dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
 
-Head : head()
+*Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiều thuộc tính liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về các cột:*
 
-Head is a function which returns the first 6 observations of the dataset.
+- **Mang thai:** Số lần người phụ nữ đã mang thai.
+
+- **Glucose:** Nồng độ glucose trong huyết tương của người phụ nữ.
+
+- **Huyết áp:** Đo huyết áp.
+
+- **Độ dày của da:** Độ dày của nếp gấp da ở cơ tam đầu.
+
+- **Insulin:** Nồng độ insulin trong máu.
+
+- **BMI (Chỉ số khối cơ thể):** Thước đo lượng mỡ trong cơ thể dựa trên chiều cao và cân nặng.
+
+- **Chức năng phả hệ bệnh tiểu đường:** Một chức năng cho thấy khả năng mắc bệnh tiểu đường dựa trên tiền sử gia đình.
+
+- **Tuổi:** Tuổi của người phụ nữ.
+
+- **Kết quả:** Biến mục tiêu cho biết người phụ nữ có mắc bệnh tiểu đường hay không (1 đối với bệnh nhân tiểu đường, 0 đối với người không mắc bệnh tiểu đường).
+
+
+### Check for Null Values
+
+*The following code checks for null values in each column.*
+
 ```{r}
-head(diabetes)
+na_count<-colSums(sapply(diabetes,is.na))
+na_count
 ```
-Summary : summary()
+### Handling Null Values
 
-Here we are computing the minimum,1st quartile, median, mean,3rd quartile and the maximum for all numeric variables of a dataset at once using summary() function.
+*There are several ways to handle null values in a dataset.*
 
-```{r}
-summary(diabetes)
-```
-Structure : str()
+*Fill in the missing values with the median value of each column.*
 
-The structure() function displays the internal structure of a data object.
-```{r}
-str(diabetes)
-```
-Column Names : colnames()
-The colname() function displays the column names available in the dataset.
 
 ```{r}
-colnames(diabetes)
+diabetes_median <- diabetes %>%
+mutate_all(~ ifelse(is.na(.), median(., na.rm = TRUE), .))
 ```
+
+*fill in the missing values with the mean value of each column*
+
+
+```{r}
+diabetes_mean <- diabetes %>%
+mutate_all(~ ifelse(is.na(.), mean(., na.rm = TRUE), .))
+```
+
+*fill in the missing values with the common value of each column*
+```{r}
+
+fill_mode <- function(x) {
+  mode_val <- names(sort(table(x), decreasing = TRUE))[1] 
+  x[is.na(x)] <- mode_val 
+  return(x)
+}
+
+diabetes_mode <- diabetes %>%
+mutate_all(fill_mode)
+
+
+```
+
+### Handling Outliers
+
+*Z-score (z-score standardization) is a method for handling outliers. It is calculated using the following formula:*
+
+$$
+Z = \frac{{X - \bar{X}}}{{\sigma}}
+$$
+
+*where:*
+
+- \( X \) is the specific value.
+
+- \( \bar{X} \) is the mean of the variable.
+
+- \( \sigma \) is the standard deviation of the variable.
+
+*This method helps standardize the data and identify values that deviate significantly from the mean.*
+
+
+```{r}
+diabetes_z <- (diabetes - colMeans(diabetes)) / apply(diabetes, 2, sd)
+diabetes_z
+
+```
+
+*Drawing scatter plot from the graph*
+
+```{r}
+
+melted_diabetes <- gather(diabetes_z, key = "Variable", value = "Z-score")
+
+# Vẽ scatter plot cho tất cả các cột
+ggplot(melted_diabetes, aes(x = Variable, y = `Z-score`, color = `Z-score`)) +
+  geom_point() +
+  labs(x = "Variable", y = "Z-score", title = "Scatter Plots of Z-scores") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Điều chỉnh góc và vị trí của chú thích trên trục x
+```
+*Drawing scatter plot from the graph, we observe that values >= 700 are outliers*
+
+
+```{r}
+# Lọc các giá trị Z-score mà tất cả đều nhỏ hơn 360
+diabetes_filter <- diabetes[rowSums(apply(diabetes_z, 2, function(x) abs(x) < 700)) == ncol(diabetes_z), ]
+
+# Hiển thị kích thước của bộ dữ liệu sau khi loại bỏ
+cat("Còn lại số lượng hàng và cột là:", dim(diabetes_filter))
+
+```
+
+### Correlation between Numeric Variables and Outcomes
+*Drawing boxplot*
+
+```{r}
+attach(diabetes)
+par(mfrow=c(2,4))
+boxplot(Pregnancies~Outcome, main="No. of Pregnancies vs. Diabetes", 
+        xlab="Outcome", ylab="Pregnancies",col="red")
+boxplot(Glucose~Outcome, main="Glucose vs. Diabetes", 
+        xlab="Outcome", ylab="Glucose",col="pink")
+boxplot(BloodPressure~Outcome, main="Blood Pressure vs. Diabetes", 
+        xlab="Outcome", ylab="Blood Pressure",col="green")
+boxplot(SkinThickness~Outcome, main="Skin Thickness vs. Diabetes", 
+        xlab="Outcome", ylab="Skin Thickness",col="orange")
+boxplot(Insulin~Outcome, main="Insulin vs. Diabetes", 
+        xlab="Outcome", ylab="Insulin",col="yellow")
+boxplot(BMI~Outcome, main="BMI vs. Diabetes", 
+        xlab="Outcome", ylab="BMI",col="purple")
+boxplot(DiabetesPedigreeFunction~Outcome, main="Diabetes Pedigree Function vs. Diabetes", xlab="Outcome", ylab="DiabetesPedigreeFunction",col="lightgreen")
+boxplot(Age~Outcome, main="Age vs. Diabetes", 
+        xlab="Outcome", ylab="Age",col="lightblue")
+box(which = "outer", lty = "solid")
+```
+
+## **STEP-3: Build Machine Learning Models**
+
+###Logarit Regression
+
+```{r}
+
+```
+
+
+
 
 
