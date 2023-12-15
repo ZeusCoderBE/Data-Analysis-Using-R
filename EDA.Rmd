@@ -1,7 +1,7 @@
 ---
 title: "EDA"
 output:
-  html_document:
+  html_notebook:
     df_print: paged
 ---
 # <span style="color:red;">**Mô tả về tập dữ liệu **</span>
@@ -256,30 +256,3 @@ Ta có thể thấy:
 -   Glucose, BMI và Age ảnh hưởng tới kết quả mắc bệnh lớn nhất với 0.47, 0.29, 0.24
 
 -   SkinThickness, BloodPressure ảnh hưởng tới kết quả mắc bệnh yếu nhất với 0.7
-
-### **Classifying the categories of Mass (BMI)**
-
-The World Health Organization (WHO) classifies adults based on the following BMI ranges:
-
--   Underweight: \< 18.5 kg/m\^2
-
--   Normal weight: 18.5 - 24.9 kg/m\^2
-
--   Overweight: 25.0 - 29.9 kg/m\^2
-
--   Obese: ≥ 30.0 kg/m\^2
-
-```{r}
-diabetes$BMI_Category <- cut(diabetes$BMI, 
-                             breaks = c(-Inf, 18.5, 24.9, 29.9, Inf), 
-                             labels = c("Underweight", "Normal", "Overweight", "Obese"))
-
-```
-
-```{r}
-ggplot(diabetes, aes(x = BMI_Category)) + 
-  geom_bar(stat = "count") +
-  labs(title = "Distribution of BMI Categories", x = "BMI Category", y = "Count") +
-  theme_bw()
-
-```
