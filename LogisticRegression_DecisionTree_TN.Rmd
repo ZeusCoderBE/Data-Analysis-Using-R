@@ -1,0 +1,210 @@
+---
+title: "Logistic_Regressio"
+author: "Thien Nhan"
+date: "2023-12-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# ANALYST DIABETES DATASET
+
+## Import library
+
+```{r}
+library(dplyr)
+library(readr)
+```
+
+## Import dataset
+
+```{r}
+# Đọc file CSV trực tiếp từ đường link
+df <- read_csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
+# Hiển thị dữ liệu
+head(df)
+```
+
+```{r}
+colnames(df)
+```
+
+```{r}
+str(df)
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+sapply (df, sd)
+```
+
+## Trực quan hóa
+
+```{r}
+library(ggplot2)
+```
+
+
+```{r}
+# Tạo biểu đồ cột
+outcome_counts <- table(df$Outcome)
+barplot(outcome_counts, main = "Tỷ lệ bệnh tiểu đường", xlab = "Outcome", ylab = "Số lượng", col = c("green", "red"))
+
+# Tạo chú thích
+legend("topright", legend = c("Không có bệnh", "Có bệnh"), fill = c("green", "red"))
+
+
+# Tính phần trăm
+percentages <- round(prop.table(outcome_counts) * 100, 1)
+
+# Tạo biểu đồ tròn
+pie(outcome_counts, main = "Tỷ lệ bệnh tiểu đường", labels = paste(percentages, "%"), col = c("lightgreen", "lightcoral"))
+
+# Tạo chú thích
+legend("topright", legend = c("Không có bệnh", "Có bệnh"), fill = c("green", "red"))
+```
+
+## Ma trận tương quan
+
+```{r}
+library(corrgram)
+```
+
+```{r}
+corrgram(df)
+```
+
+Xét biểu đồ tương quan, ta thấy:<br>
+- Pregnancies và Age tương quan cao<br>
+- SkinThickness và Insulin tương quan cao<br>
+
+Do đó: Khi xây dựng mô hình dự đoán, với mỗi cặp thuộc tính, chỉ sử dụng 1 trong 2 để hạn chế tình trạng đa cộng tuyến (multicollinearity)
+
+
+
+## Xây dựng các mô hình
+
+### Chia tập dữ liệu thành 2 tập train và test
+
+```{r}
+library(caret)
+```
+
+```{r}
+set.seed(1)
+split <- createDataPartition(df$Outcome,p = 0.75,list = FALSE)
+dfTrain <- df[split,]
+dfTest <- df[-split,]
+```
+
+```{r}
+head(dfTrain)
+```
+
+```{r}
+head(dfTest)
+```
+
+### Xây dựng mô hình hồi quy logarit
+
+#### Mô hình hồi quy logarit
+```{r}
+# Xây dựng mô hình hồi quy logistic
+model <- glm(Outcome ~ Glucose + BloodPressure + BMI + Insulin + DiabetesPedigreeFunction + Age, data = dfTrain, family = binomial)
+
+summary(model)
+```
+#### Độ chính xác của mô hình
+
+```{r}
+# Dự đoán giá trị trên tập dữ liệu kiểm tra
+predictions <- predict(model, newdata = dfTest, type = "response")
+
+# Chuyển đổi dự đoán thành giá trị nhị phân (0/1) dựa trên ngưỡng cắt (ví dụ: 0.5)
+predicted_classes <- ifelse(predictions > 0.5, 1, 0)
+
+# So sánh giữa giá trị dự đoán và giá trị thực tế
+confusion_matrix <- table(predicted_classes, dfTest$Outcome)
+print(confusion_matrix)
+```
+
+```{r}
+# Tính toán độ chính xác từ ma trận nhầm lẫn
+calculate_accuracy <- function(confusion_matrix) {
+  correct_predictions <- sum(diag(confusion_matrix))  # Tổng số dự đoán đúng
+  total_samples <- sum(confusion_matrix)  # Tổng số mẫu
+  
+  accuracy <- correct_predictions / total_samples  # Tính toán độ chính xác
+  return(accuracy)
+}
+```
+
+```{r}
+accuracy <- calculate_accuracy(confusion_matrix)
+accuracy
+```
+### Xây dựng mô hình cây quyết định 
+
+#### Tính entropy cho các thuộc tính
+```{r}
+# Tính entropy cho từng cột trong dfTrain
+# Hàm tính entropy
+calculate_entropy <- function(attribute_vector) {
+  total_count <- length(attribute_vector)
+  values <- table(attribute_vector)
+  probabilities <- values / total_count
+  entropy <- -sum(probabilities * log2(probabilities))
+  return(entropy)
+}
+
+calculate_entropy_for_columns <- function(data) {
+  entropy_values <- numeric()
+  for (col in names(data)) {
+    entropy <- calculate_entropy(data[[col]])
+    entropy_values <- c(entropy_values, entropy)
+  }
+  names(entropy_values) <- names(data)
+  return(entropy_values)
+}
+
+# Tính entropy cho các cột trong dfTrain
+entropy_values <- calculate_entropy_for_columns(dfTrain)
+entropy_values
+
+```
+
+
+#### Xây dựng mô hình cây quyết định
+```{r}
+# Huấn luyện mô hình cây quyết định
+library(rpart)
+model <- rpart(Outcome ~ ., data = dfTrain, method = "class")
+
+# In cây quyết định
+print(model)
+
+# Biểu đồ cây quyết định
+library(rpart.plot)
+rpart.plot(model)
+```
+
+
+#### Kiểm tra mô hình cây quyết định
+
+```{r}
+predictions <- predict(model, newdata = dfTest, type = "class")
+
+# So sánh giữa giá trị dự đoán và giá trị thực tế
+confusion_matrix <- table(predictions, dfTest$Outcome)
+print(confusion_matrix)
+
+# Tính toán độ chính xác từ ma trận nhầm lẫn
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+accuracy
+```

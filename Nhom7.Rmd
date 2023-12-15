@@ -435,4 +435,3 @@ t.test(diabetes$Age, mu=32)
 - p-value nhỏ mức ý nghĩa 5%. 
 - Giống như bất kỳ bài kiểm tra thống kê nào khác , nếu p-value nhỏ hơn mức ý nghĩa thì có thể bác bỏ giả thuyết không.
 --> Dựa vào kết quả kiểm định t-test, có thể kết luận rằng giá trị trung bình thực sự của cột "Age" không bằng 32, và Ước lượng trung bình của mẫu có thể nằm trong khoảng từ 32.41 đến 34.07 với mức tin cậy 95%.
-
