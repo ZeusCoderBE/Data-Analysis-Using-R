@@ -207,8 +207,15 @@ box(which = "outer", lty = "solid")
 
 ###Logarit Regression
 
-```{r}
+*Blood pressure and skin thickness show little variation with diabetes, they will be excluded from the model. Other variables show more or less correlation with diabetes, so will be kept*
 
+```{r}
+diabetes$BloodPressure <- NULL
+diabetes$SkinThickness <- NULL
+train <- diabetes[1:530,]
+test <- diabetes[531:760,]
+model <-glm(Outcome ~.,family=binomial(link='logit'),data=train)
+summary(model)
 ```
 
 
