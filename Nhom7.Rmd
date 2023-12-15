@@ -138,7 +138,7 @@ ggplot(melted_diabetes, aes(x = Variable, y = `Z-score`, color = `Z-score`)) +
   labs(x = "Variable", y = "Z-score", title = "Scatter Plots of Z-scores") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Điều chỉnh góc và vị trí của chú thích trên trục x
 ```
-*Drawing scatter plot from the graph, we observe that values >= 700 are outliers*
+*Vẽ biểu đồ phân tán từ biểu đồ, chúng tôi quan sát thấy các giá trị >= 700 là các giá trị ngoại lệ*
 
 
 ```{r}
@@ -174,20 +174,67 @@ boxplot(Age~Outcome, main="Age vs. Diabetes",
 box(which = "outer", lty = "solid")
 ```
 
-## **STEP-3: Build Machine Learning Models**
+*Huyết áp và độ dày của da ít thay đổi với bệnh tiểu đường, chúng sẽ bị loại khỏi mô hình. Các biến khác ít nhiều cho thấy mối tương quan với bệnh tiểu đường nên sẽ được giữ nguyên*
 
-### Logarit Regression
-
-*Blood pressure and skin thickness show little variation with diabetes, they will be excluded from the model. Other variables show more or less correlation with diabetes, so will be kept*
 
 ```{r}
 diabetes$BloodPressure <- NULL
 diabetes$SkinThickness <- NULL
+```
+
+
+## **STEP-3: Build Machine Learning Models**
+
+### PREDICTING DIABETES using Logarithmic Regression model
+
+```{r}
 train <- diabetes[1:530,]
 test <- diabetes[531:760,]
 model <-glm(Outcome ~.,family=binomial(link='logit'),data=train)
 summary(model)
 ```
+
+*"Ba thuộc tính phù hợp nhất, 'Glucose', 'BMI' và 'Mang thai' có giá trị p thấp, cho thấy mức ý nghĩa cao. Điều này cho thấy rằng các biến độc lập này ảnh hưởng đáng kể đến hiệu suất của mô hình hồi quy logistic trong dự đoán 'Kết quả.'* 
+
+*“Insulin” và “Tuổi” không có ý nghĩa thống kê vì giá trị p cao .*
+```{r}
+anova(model, test="Chisq")
+```
+*Bảng "Analysis of Deviance Table" cung cấp thông tin về sự biến động của deviance (độ lệch) khi thêm vào từng biến độc lập vào mô hình*
+
+*Từ bảng độ lệch, chúng ta có thể thấy rằng việc bổ sung insulin và tuổi tác ít ảnh hưởng đến độ lệch còn lại.*
+
+###Cross Validation
+
+*Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh ,0: không mắc bệnh*
+*Tính toán ma trận nhầm lẫn *
+```{r}
+fitted.results <- predict(model,newdata=test,type='response')
+fitted.results <- ifelse(fitted.results > 0.5,1,0)
+(conf_matrix_logi<-table(fitted.results, test$Outcome))
+
+```
+*Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*
+
+```{r}
+TP <- conf_matrix_logi[2, 2]  # True Positive
+TN <- conf_matrix_logi[1, 1]  # True Negative
+FP <- conf_matrix_logi[1, 2]  # False Positive
+FN <- conf_matrix_logi[2, 1]  # False Negative
+
+Accuracy<-(TP+TN)/(TP+TN+FP+FN)
+cat("Độ chính xác:",Accuracy,"\n")
+
+#trong số bệnh nhân thực tế bị bệnh tiểu đường,bao nhiêu phần trăm được dự báo bị bệnh
+Sensitivity<-TP/(TP+FN)
+cat("Độ nhạy:",Sensitivity,"\n")
+#trong số bệnh nhân thực tế không bị bệnh, bao nhiêu phần trăm được dự báo không bị bệnh
+
+Specificity<-TN/(TN+FP)
+cat("Độ đặc hiệu",Specificity)
+
+```
+
 
 
 ### Classifying the categories of Mass (BMI) using Random Forest
