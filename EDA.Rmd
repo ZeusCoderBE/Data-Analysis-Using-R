@@ -1,14 +1,16 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ## Installing module
+
 ```{r}
 install.packages('reader')
 install.packages("lattice")
@@ -29,23 +31,23 @@ diabetes
 
 Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiều thuộc tính liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về các cột:
 
-* Mang thai: Số lần người phụ nữ đã mang thai.
+-   Mang thai: Số lần người phụ nữ đã mang thai.
 
-* Glucose: Nồng độ glucose trong huyết tương của người phụ nữ.
+-   Glucose: Nồng độ glucose trong huyết tương của người phụ nữ.
 
-* Huyết áp: Đo huyết áp.
+-   Huyết áp: Đo huyết áp.
 
-* Độ dày của da: Độ dày của nếp gấp da ở cơ tam đầu.
+-   Độ dày của da: Độ dày của nếp gấp da ở cơ tam đầu.
 
-* Insulin: Nồng độ insulin trong máu.
+-   Insulin: Nồng độ insulin trong máu.
 
-* BMI (Chỉ số khối cơ thể): Thước đo lượng mỡ trong cơ thể dựa trên chiều cao và cân nặng.
+-   BMI (Chỉ số khối cơ thể): Thước đo lượng mỡ trong cơ thể dựa trên chiều cao và cân nặng.
 
-* Chức năng phả hệ bệnh tiểu đường: Một chức năng cho thấy khả năng mắc bệnh tiểu đường dựa trên tiền sử gia đình.
+-   Chức năng phả hệ bệnh tiểu đường: Một chức năng cho thấy khả năng mắc bệnh tiểu đường dựa trên tiền sử gia đình.
 
-* Tuổi: Tuổi của người phụ nữ.
+-   Tuổi: Tuổi của người phụ nữ.
 
-* Kết quả: Biến mục tiêu cho biết người phụ nữ có mắc bệnh tiểu đường hay không (1 đối với bệnh nhân tiểu đường, 0 đối với người không mắc bệnh tiểu đường).
+-   Kết quả: Biến mục tiêu cho biết người phụ nữ có mắc bệnh tiểu đường hay không (1 đối với bệnh nhân tiểu đường, 0 đối với người không mắc bệnh tiểu đường).
 
 #### Structure of dataset
 
@@ -84,14 +86,14 @@ ggplot(data = diabetes, aes(x = diabetes_groups, y = Glucose)) +
   labs(x = "Outcome", y = "Glucose (mg/dL)")
 
 ```
+
 Ta có thể thấy:
 
-* Từ boxplot về độ tuổi, cho thấy rằng phụ nữ trong tập dữ liệu tập trung chủ yếu ở khoảng 25-41 tuổi
+-   Từ boxplot về độ tuổi, cho thấy rằng phụ nữ trong tập dữ liệu tập trung chủ yếu ở khoảng 25-41 tuổi
 
-* Từ boxplot về số lần mang thai, cho thấy rằng phụ nữ chủ yếu có số lần mang thai từ 1-6 lần
+-   Từ boxplot về số lần mang thai, cho thấy rằng phụ nữ chủ yếu có số lần mang thai từ 1-6 lần
 
-* Từ boxplot giữa nồng độ glucose và kết quả, những người không bệnh sẽ có nồng độ glucose thấp hơn nhóm bị bệnh; nhóm không bệnh có nồng độ glucose tập trung khoảng 99-130 mg/dl, còn nhóm bị bệnh khoảng 130-170 mg/dl
-
+-   Từ boxplot giữa nồng độ glucose và kết quả, những người không bệnh sẽ có nồng độ glucose thấp hơn nhóm bị bệnh; nhóm không bệnh có nồng độ glucose tập trung khoảng 99-130 mg/dl, còn nhóm bị bệnh khoảng 130-170 mg/dl
 
 #### The mode of Pregnancies and Glucose
 
@@ -111,11 +113,9 @@ polygon(density(diabetes$Glucose),
 
 Ta có thể thấy:
 
-* Lượng Insulin càng ít thì lượng đường Glucose càng cao, do Insulin có khả nào chuyển hóa đường nhưng những người mắc bệnh tiểu đường thì cơ thể họ sẽ khó khắn trong việc sản xuất Insulin
+-   Lượng Insulin càng ít thì lượng đường Glucose càng cao, do Insulin có khả nào chuyển hóa đường nhưng những người mắc bệnh tiểu đường thì cơ thể họ sẽ khó khắn trong việc sản xuất Insulin
 
-* Lượng đường Glucose trong tập data chủ yếu trong khoảng 90 - 150 
-
-
+-   Lượng đường Glucose trong tập data chủ yếu trong khoảng 90 - 150
 
 #### The correlation between attributes and Outcome
 
@@ -141,13 +141,12 @@ ggplot(data = diabetes, aes(x = Pregnancies, y = Outcome)) +
        x = "Số lần mang thai (lần)",
        y = "Kết quả (1 = mắc bệnh, 0 = không mắc bệnh)")
 ```
+
 Ta có thể thấy
 
-* Theo đường hồi quy dương trên, số lần mang thai hoặc nồng độ glucose càng tăng thì tỉ lệ mắc bệnh tiểu đường càng cao
+-   Theo đường hồi quy dương trên, số lần mang thai hoặc nồng độ glucose càng tăng thì tỉ lệ mắc bệnh tiểu đường càng cao
 
-* Ngược lại, độ dày của da không ảnh hưởng quá mạnh vào khả năng mắc bệnh tiểu đường
-
-
+-   Ngược lại, độ dày của da không ảnh hưởng quá mạnh vào khả năng mắc bệnh tiểu đường
 
 #### Kiểm tra giá trị rỗng
 
@@ -191,7 +190,6 @@ calculate_rate <- function(inp) {
   return (rates)
 }
 ```
-
 
 ```{r}
 for (col in colnames(diabetes)) {
@@ -244,26 +242,26 @@ library(ggplot2)
 ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, fill=value)) + geom_tile() +
   geom_text(aes(Var2, Var1, label = value), color = "white", size = 4)
 ```
+
 Ta có thể thấy:
 
-* Tất cả thuộc tính đều có quan hệ thuận biến với Outcome (kết quả)
+-   Tất cả thuộc tính đều có quan hệ thuận biến với Outcome (kết quả)
 
-* Glucose, BMI và Age ảnh hưởng tới kết quả mắc bệnh lớn nhất với 0.47, 0.29, 0.24
+-   Glucose, BMI và Age ảnh hưởng tới kết quả mắc bệnh lớn nhất với 0.47, 0.29, 0.24
 
-* SkinThickness, BloodPressure ảnh hưởng tới kết quả mắc bệnh yếu nhất với 0.7
-
+-   SkinThickness, BloodPressure ảnh hưởng tới kết quả mắc bệnh yếu nhất với 0.7
 
 ## Classifying the categories of Mass (BMI)
 
 The World Health Organization (WHO) classifies adults based on the following BMI ranges:
 
-* Underweight: < 18.5 kg/m^2
+-   Underweight: \< 18.5 kg/m\^2
 
-* Normal weight: 18.5 - 24.9 kg/m^2
+-   Normal weight: 18.5 - 24.9 kg/m\^2
 
-* Overweight: 25.0 - 29.9 kg/m^2
+-   Overweight: 25.0 - 29.9 kg/m\^2
 
-* Obese: ≥ 30.0 kg/m^2
+-   Obese: ≥ 30.0 kg/m\^2
 
 ```{r}
 diabetes$BMI_Category <- cut(diabetes$BMI, 
@@ -279,4 +277,3 @@ ggplot(diabetes, aes(x = BMI_Category)) +
   theme_bw()
 
 ```
-
