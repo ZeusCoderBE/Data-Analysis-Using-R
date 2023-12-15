@@ -66,6 +66,7 @@ summary(diabetes)
 ```{r}
 library(ggplot2)
 library(cowplot)
+library(gridExtra)
 ```
 
 ```{r}
@@ -208,9 +209,7 @@ for (col in colnames(diabetes)) {
 Vẽ trực quan tỉ lệ ngoại lai
 
 ```{r}
-outlier_col = c("BloodPressure", "Insulin", "BMI", "DiabetesPedigreeFunction")
-
-for (col in outlier_col) {
+pie_outlier <- function(outlier_col) {for (col in outlier_col) {
   rates <- calculate_rate(unlist(diabetes[, col]))
   
   pie_data <- data.frame(
@@ -219,14 +218,19 @@ for (col in outlier_col) {
   )
   
   # Vẽ trực quan những cột có tỉ lệ ngoại lai >= 2.3%
-  print(ggplot(pie_data, aes(x="", y = rate, fill=type)) +
+  return(ggplot(pie_data, aes(x="", y = rate, fill=type)) +
   geom_bar(stat="identity", width=1, color="white") +
   coord_polar("y", start=0) +
   theme_void() +
-  labs(title = paste("Outlier Rate vs Regular Value Rate in", col),
+  labs(title = paste(col),
      caption = paste0("Total Outliers (%):", round(rates$outlier, 2), ", Regular Values (%):", round(rates$regular, 2))))
-}
+}}
 ```
+
+```{r}
+grid.arrange(pie_outlier("BloodPressure"), pie_outlier("Insulin"), pie_outlier("BMI"), pie_outlier("DiabetesPedigreeFunction"), ncol=2)
+```
+
 
 #### Kiểm tra độ tương quan của các thuộc tính
 
