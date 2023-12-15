@@ -1,0 +1,286 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Installing module
+```{r}
+install.packages('reader')
+install.packages("lattice")
+install.packages("reshape2")
+install.packages('ggplot2')
+```
+
+## Exploring data
+
+```{r}
+library(reader)
+
+# Đọc file CSV trực tiếp từ đường link
+diabetes <- read_csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
+# Hiển thị dữ liệu
+diabetes
+```
+
+### Overall of dataset: dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
+
+Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiều thuộc tính liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về các cột:
+
+* Mang thai: Số lần người phụ nữ đã mang thai.
+
+* Glucose: Nồng độ glucose trong huyết tương của người phụ nữ.
+
+* Huyết áp: Đo huyết áp.
+
+* Độ dày của da: Độ dày của nếp gấp da ở cơ tam đầu.
+
+* Insulin: Nồng độ insulin trong máu.
+
+* BMI (Chỉ số khối cơ thể): Thước đo lượng mỡ trong cơ thể dựa trên chiều cao và cân nặng.
+
+* Chức năng phả hệ bệnh tiểu đường: Một chức năng cho thấy khả năng mắc bệnh tiểu đường dựa trên tiền sử gia đình.
+
+* Tuổi: Tuổi của người phụ nữ.
+
+* Kết quả: Biến mục tiêu cho biết người phụ nữ có mắc bệnh tiểu đường hay không (1 đối với bệnh nhân tiểu đường, 0 đối với người không mắc bệnh tiểu đường).
+
+#### Structure of dataset
+
+```{r}
+str(diabetes)
+```
+
+#### Summary of statistic
+
+```{r}
+summary(diabetes)
+```
+
+#### Data visualization of age
+
+```{r}
+library(ggplot2)
+library(cowplot)
+```
+
+```{r}
+par(mfrow=c(1,3))
+# Boxplot cho Age
+boxplot(diabetes$Age,
+        col="#ff0066",
+        main="Boxplot for Descriptive Analysis of Age")
+
+# Boxplot cho Pregnancies
+boxplot(diabetes$Pregnancies,
+        col="yellow",
+        main="Boxplot for Descriptive Analysis of Pregnancy")
+
+# Boxplot cho Outcome và Glucose theo người mắc bệnh và không
+diabetes_groups <- cut(diabetes$Outcome, c(-Inf, 0, Inf), labels = c("Không bệnh", "Bệnh"))
+
+boxplot(diabetes$Glucose~diabetes_groups, xlab="Outcome", ylab="Glucose (mg/dl)", main="Tỉ lệ giữa Glucose và Outcome ở hai đối tượng", col="pink")
+box(which = "outer", lty = "solid")
+```
+Ta có thể thấy:
+
+* Từ boxplot về độ tuổi, cho thấy rằng phụ nữ trong tập dữ liệu tập trung chủ yếu ở khoảng 25-41 tuổi
+
+* Từ boxplot về số lần mang thai, cho thấy rằng phụ nữ chủ yếu có số lần mang thai từ 1-6 lần
+
+* Từ boxplot giữa nồng độ glucose và kết quả, những người không bệnh sẽ có nồng độ glucose thấp hơn nhóm bị bệnh; nhóm không bệnh có nồng độ glucose tập trung khoảng 99-130 mg/dl, còn nhóm bị bệnh khoảng 130-170 mg/dl
+
+
+#### The mode of Pregnancies and Glucose
+
+```{r}
+par(mfrow=c(1,2))
+plot(Insulin, Glucose, type='p', col=c("red"), pch=20, main="Scatter Plot for Glucose and Insulin")
+
+plot(density(diabetes$Glucose),
+     col="yellow",
+     main="Density Plot for Glucose",
+     xlab="Glucose",
+     ylab="Density")
+polygon(density(diabetes$Glucose),
+        col="#ccff66")
+box(which="outer", lty="solid")
+```
+
+Ta có thể thấy:
+
+* Lượng Insulin càng ít thì lượng đường Glucose càng cao, do Insulin có khả nào chuyển hóa đường nhưng những người mắc bệnh tiểu đường thì cơ thể họ sẽ khó khắn trong việc sản xuất Insulin
+
+* Lượng đường Glucose trong tập data chủ yếu trong khoảng 90 - 150 
+
+
+
+#### The correlation between attributes and Outcome
+
+```{r}
+p1 <- ggplot(data = diabetes, aes(x = Glucose, y = Outcome)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Mối quan hệ giữa nồng độ glucose và kết quả bệnh tiểu đường",
+       x = "Nồng độ glucose (mg/dL)",
+       y = "Kết quả (1 = mắc bệnh, 0 = không mắc bệnh)")
+
+p2 <- ggplot(data = diabetes, aes(x = SkinThickness, y = Outcome)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Mối quan hệ giữa độ dày của da và kết quả bệnh tiểu đường",
+       x = "độ dày da (mm)",
+       y = "Kết quả (1 = mắc bệnh, 0 = không mắc bệnh)")
+
+p3 <- ggplot(data = diabetes, aes(x = Pregnancies, y = Outcome)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Mối quan hệ giữa số lần mang thai và kết quả bệnh tiểu đường",
+       x = "Số lần mang thai (lần)",
+       y = "Kết quả (1 = mắc bệnh, 0 = không mắc bệnh)")
+
+grid.arrange(p1, p2, p3, ncol = 3)
+```
+Ta có thể thấy
+
+* Theo đường hồi quy dương trên, số lần mang thai hoặc nồng độ glucose càng tăng thì tỉ lệ mắc bệnh tiểu đường càng cao
+
+* Ngược lại, độ dày của da không ảnh hưởng quá mạnh vào khả năng mắc bệnh tiểu đường
+
+
+
+#### Kiểm tra giá trị rỗng
+
+```{r}
+sum_of_nan <- sum(is.na(diabetes))
+paste("Tổng số giá trị rỗng trong dataset:", sum_of_nan)
+
+for (col in colnames(diabetes)) {
+  nan_of_col <- sum(is.na(diabetes[, col]))
+  print(paste("Số giá trị rỗng trong cột", col, ":", nan_of_col))
+}
+```
+
+#### Kiểm tra giá trị ngoại lai
+
+Tìm giá trị ngoại lai
+
+```{r}
+find_outliers <- function(inp, na.rm = TRUE) {
+  i.qnt <- quantile(inp, probs = c(0.25, 0.75), na.rm = na.rm)
+  i.max <- 1.5 * IQR(inp, na.rm = na.rm)
+  
+  outliers <- inp < (i.qnt[1] - i.max) | inp > (i.qnt[2] + i.max)
+  
+  return(outliers)
+}
+
+```
+
+Lập tỉ lệ outliers trong cột tương ứng
+
+```{r}
+calculate_rate <- function(inp) {
+  num_outliers <- sum(find_outliers(inp))
+  num_regular <- length(inp) - num_outliers
+  
+  outlier_rate <- num_outliers / length(inp) * 100
+  regular_rate <- num_regular / length(inp) * 100
+  
+  rates <- list(outlier=outlier_rate, regular=regular_rate)
+  return (rates)
+}
+```
+
+
+```{r}
+for (col in colnames(diabetes)) {
+  rates <- calculate_rate(unlist(diabetes[, col]))
+  # Liệt kê tỉ lệ giá trị ngoại lại trong từng cột
+  print(paste(col, "-", "Total Outliers (%):", round(rates$outlier, 2), ", Regular Values (%):", round(rates$outlier, 2)))
+}
+```
+
+Vẽ trực quan tỉ lệ ngoại lai
+
+```{r}
+outlier_col = c("BloodPressure", "Insulin", "BMI", "DiabetesPedigreeFunction")
+
+for (col in outlier_col) {
+  rates <- calculate_rate(unlist(diabetes[, col]))
+  
+  pie_data <- data.frame(
+    type = c("Outliers", "Regular"),
+    rate = c(rates$outlier, rates$regular)
+  )
+  
+  # Vẽ trực quan những cột có tỉ lệ ngoại lai >= 2.3%
+  print(ggplot(pie_data, aes(x="", y = rate, fill=type)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void() +
+  labs(title = paste("Outlier Rate vs Regular Value Rate in", col),
+     caption = paste0("Total Outliers (%):", round(rates$outlier, 2), ", Regular Values (%):", round(rates$regular, 2))))
+}
+```
+
+#### Kiểm tra độ tương quan của các thuộc tính
+
+```{r}
+library(lattice)
+library(reshape2)
+```
+
+```{r}
+# creating correlation matrix
+corr_mat <- round(cor(diabetes),2)
+ 
+# reduce the size of correlation matrix
+melted_corr_mat <- melt(corr_mat)
+# head(melted_corr_mat)
+ 
+# plotting the correlation heatmap
+library(ggplot2)
+ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, fill=value)) + geom_tile() +
+  geom_text(aes(Var2, Var1, label = value), color = "white", size = 4)
+```
+Ta có thể thấy:
+
+* Tất cả thuộc tính đều có quan hệ thuận biến với Outcome (kết quả)
+
+* Glucose, BMI và Age ảnh hưởng tới kết quả mắc bệnh lớn nhất với 0.47, 0.29, 0.24
+
+* SkinThickness, BloodPressure ảnh hưởng tới kết quả mắc bệnh yếu nhất với 0.7
+
+
+## Classifying the categories of Mass (BMI)
+
+The World Health Organization (WHO) classifies adults based on the following BMI ranges:
+
+* Underweight: < 18.5 kg/m^2
+
+* Normal weight: 18.5 - 24.9 kg/m^2
+
+* Overweight: 25.0 - 29.9 kg/m^2
+
+* Obese: ≥ 30.0 kg/m^2
+
+```{r}
+diabetes$BMI_Category <- cut(diabetes$BMI, 
+                             breaks = c(-Inf, 18.5, 24.9, 29.9, Inf), 
+                             labels = c("Underweight", "Normal", "Overweight", "Obese"))
+
+```
+
+```{r}
+ggplot(diabetes, aes(x = BMI_Category)) + 
+  geom_bar(stat = "count") +
+  labs(title = "Distribution of BMI Categories", x = "BMI Category", y = "Count") +
+  theme_bw()
+
+```
+
