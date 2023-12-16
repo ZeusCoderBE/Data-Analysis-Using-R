@@ -265,7 +265,7 @@ Chia dữ liệu thành huấn luyện và kiểm tra. 80% dành cho đào tạo
 ```{r}
 set.seed(123)
 
-samp <- sample(nrow(diabetes_filter), 0.8 * nrow(diabetes_filter))
+samp <- sample(nrow(diabetes_filter), 0.75 * nrow(diabetes_filter))
 
 train <- diabetes_filter[samp, ]
 
@@ -288,7 +288,7 @@ library(randomForest)
 Bây giờ chúng ta đã cài đặt xong thư viện RandomForest, chúng ta hãy xây dựng mô hình rừng ngẫu nhiên
 
 ```{r}
-model <- randomForest(BMI_Category ~ . - Outcome, data = train, ntree = 1000, mtry = 3)
+model <- randomForest(BMI_Category ~ . - Outcome, data = train, ntree = 5, mtry = 3)
 
 model
 ```
