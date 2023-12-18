@@ -521,6 +521,7 @@ t.test(diabetes$Age, mu=32)
 library(caret)
 ```
 
+Chi tập dữ liệu thành 2 phần, tập train để xây dựng mô hình và tập test để kiểm tra mô hình
 ```{r}
 set.seed(1)
 split <- createDataPartition(df$Outcome,p = 0.75,list = FALSE)
@@ -537,6 +538,9 @@ head(dfTest)
 ```
 
 #### Hàm kiểm tra mô hình
+Xây dựng các hàm kiểm tra kết quả của mô hình
+
+Hàm xây dựng ma trận nhầm lẫn để xem kết quả dự đoán và tính độ chính xác bằng ma trận nhầm lẫn
 ```{r}
 # Dùng ma trận nhầm lẫn
 accuracy <- function() {
@@ -552,6 +556,8 @@ accuracy <- function() {
 }
 ```
 
+
+Hàm tính độ chính xác, độ nhạy và độ đặc hiệu của mô hình
 ```{r}
 thongso <- function() {
   predictions <- predict(model, newdata = dfTest, type = "class")
@@ -578,6 +584,7 @@ thongso <- function() {
 
 #### Xây dựng mô hình cây quyết định 
 ##### Mô hình cây quyết định
+Xây dựng mô hình cây quyết định ban đầu. Với thuộc tính mục tiêu là Outcome, và biến thành phần và các thuộc tính còn lại của tập dữ liệu
 ```{r}
 # Huấn luyện mô hình cây quyết định
 library(rpart)
@@ -590,20 +597,21 @@ print(model)
 library(rpart.plot)
 rpart.plot(model)
 ```
-
+Xem kết quả dự đoán từ mô hình cây quyết định
 ```{r}
 thongso()
 ```
 
 
 ##### Xem độ quan trọng của các thuộc tính trong mô hình
+Quan sát biểu đồ mức độ quan trọng của các thuộc tính trong mô hình để thay đổi thuộc tính thành phần
 ```{r}
 library(vip)
 var_importance <- vip::vip(model, num_features = 10)
 print(var_importance)
 ```
 
-
+Quan sát tác động của của các thuộc tính riêng lẻ lên quyết định của mô hình
 ```{r}
 library(pdp)
 library(ggplot2)
@@ -625,22 +633,25 @@ Dựa vào Partial Dependence Plot (PDP) - Biểu đồ phụ thuộc một ph�
   
 ##### Loại bỏ các thuộc tính trên (Pregnancies, SkinThickness, Insulin)
 ###### Loại bỏ Insulin
+Loại bỏ thuộc tính Insulin và quan sát thấy mô hình thu được có độ chính xác và độ nhạy cao hơn mô hình ban đầu
 ```{r}
 model <- rpart(Outcome ~ Pregnancies + Glucose + BloodPressure + SkinThickness + BMI + DiabetesPedigreeFunction + Age, data = dfTrain, method = "class")
 accuracy()
 thongso()
 ```
 ###### Loại bỏ Insulin và SkinThickness và Pregnancies
+Loại bỏ thêm 2 thuộc tính SkinThickness và Pregnancies thấy mô hình tăng độ chính xác, độ nhạy và độ đặc hiệu. Quyết định chấp nhận mô hình với độ chính xác ~85% và độ nhạy ~0.76, độ đặc hiệu ~0.89
 ```{r}
 model <- rpart(Outcome ~ Glucose + BloodPressure + BMI + DiabetesPedigreeFunction + Age, data = dfTrain, method = "class")
 rpart.plot(model)
 ```
-
+Thông số của mô hình sau khi loại bỏ các thuộc tính có độ quan trọng thấp
 ```{r}
 accuracy()
 thongso()
 ```
 ##### Trích xuất các luật từ cây quyết định
+Xem quy luật của mô hình cây quyết định
 ```{r}
 rules <- rpart.rules(model)
 print(rules)
