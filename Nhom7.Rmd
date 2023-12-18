@@ -191,7 +191,7 @@ diabetes_filter $SkinThickness <- NULL
 - *Đảm bảo rằng các biến có thang đo đồng nhất, giúp mô hình học tốt hơn.*
 
 - *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
-- *Phù hợp với các mô hình yêu cầu dữ liệu nằm trong khoảng giá trị cụ thể *.
+
 
 $$ \text{Scaled Value} = \frac{{\text{max}(X) - \text{min}(X)}}{{X - \text{min}(X)}}$$
 
@@ -238,6 +238,7 @@ fitted.results <- ifelse(fitted.results > 0.5,1,0)
 
 ```
 *Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*
+
 
 ```{r}
 TP <- conf_matrix_logi[2, 2]  # True Positive
