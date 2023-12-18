@@ -25,9 +25,6 @@ diabetes
 
 ```
 
-```{r cars}
-diabetes
-```
 
 ```{r}
 str(diabetes)
@@ -46,6 +43,10 @@ The World Health Organization (WHO) classifies adults based on the following BMI
 * Overweight: 25.0 - 29.9 kg/m^2
 
 * Obese: ≥ 30.0 kg/m^2
+
+```{r}
+library(ggplot2)
+```
 
 
 ```{r}
@@ -73,6 +74,7 @@ Chuyển đổi các giá trị BMI_Category thành factors
 diabetes$BMI_Category<- as.factor(diabetes$BMI_Category)
 
 str(diabetes)
+diabetes
 ```
 
 Tạo một dataframe bản sao với BMI_Category đã được số hóa
@@ -115,9 +117,9 @@ Ta có thể thấy:
 Chia dữ liệu thành huấn luyện và kiểm tra. 80% dành cho đào tạo, 20% dành cho kiểm tra.
 
 ```{r}
-set.seed(123)
+set.seed(1234)
 
-samp <- sample(nrow(diabetes), 0.8 * nrow(diabetes))
+samp <- sample(nrow(diabetes), 0.5 * nrow(diabetes))
 
 train <- diabetes[samp, ]
 
@@ -128,7 +130,7 @@ test <- diabetes[-samp, ]
 Kiểm tra kích thước của tập dữ liệu huấn luyện và kiểm tra:
 
 ```{r}
-dim(test) 
+paste(dim(test), dim(train))
 ```
 
 Random forest library
@@ -139,8 +141,24 @@ library(randomForest)
 
 Bây giờ chúng ta đã cài đặt xong thư viện RandomForest, chúng ta hãy xây dựng mô hình rừng ngẫu nhiên
 
+* mtry = sqrt(số lượng thuộc tính độc lập)
+
+
 ```{r}
-model <- randomForest(BMI_Category ~ . - Outcome, data = train, ntree = 1000, mtry = 3)
+tuneRF(
+  x = train[,-9],
+  y = train[,9],
+  ntreeTry = 100,
+  mtryStart = 3,
+  stepFactor = 1.5,
+  improve = 0.01,
+  trace = FALSE
+)
+```
+
+
+```{r}
+model <- randomForest(BMI_Category ~ . - Outcome, data = train, ntree = 100, mtry = mTry)
 
 model
 ```
@@ -178,6 +196,47 @@ sum(prediction==test$BMI_Category) / nrow(test) # The output is as shown below
 ```
 
 Bạn có thể thấy rằng độ chính xác của mô hình này là 98 phần trăm, điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
+
+
+### Cách 2: dùng caret
+
+```{r}
+library(caret)
+```
+
+
+```{r}
+# Chia dữ liệu thành tập huấn luyện và tập kiểm tra
+set.seed(1234)
+
+samp <- sample(nrow(diabetes), 0.8 * nrow(diabetes))
+
+train <- diabetes[samp, ]
+
+test <- diabetes[-samp, ]
+```
+
+
+```{r}
+# Huấn luyện mô hình Random Forest
+model <- train(BMI_Category ~ ., data = train, method = "rf",metric = "Accuracy" ,trControl = trainControl(
+              method = "cv",
+              number = 5),
+              search = "grid")
+
+```
+
+
+```{r}
+# Đánh giá mô hình trên tập kiểm tra
+pred <- predict(model, test)
+confusionMatrix(pred, test$BMI_Category)
+```
+
+```{r}
+sum(pred==test$BMI_Category) / nrow(test)
+```
+
 
 
 ## **kiểm định giả thuyết thống kế**

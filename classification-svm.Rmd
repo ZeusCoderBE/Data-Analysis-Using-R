@@ -1,0 +1,168 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(readr)
+```
+
+STEP-1 : Importing Diabetes Data from Google Drive
+
+```{r}
+
+# Đọc file CSV trực tiếp từ đường link
+diabetes <- read_csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
+# Hiển thị dữ liệu
+diabetes
+
+```
+
+```{r cars}
+diabetes
+```
+
+```{r}
+str(diabetes)
+```
+
+
+
+## Classifying the categories of Mass (BMI)
+
+The World Health Organization (WHO) classifies adults based on the following BMI ranges:
+
+* Underweight: < 18.5 kg/m^2
+
+* Normal weight: 18.5 - 24.9 kg/m^2
+
+* Overweight: 25.0 - 29.9 kg/m^2
+
+* Obese: ≥ 30.0 kg/m^2
+
+
+```{r}
+diabetes$BMI_Category <- cut(diabetes$BMI, 
+                             breaks = c(-Inf, 18.5, 24.9, 29.9, Inf), 
+                             labels = c("Underweight", "Normal", "Overweight", "Obese"))
+
+```
+
+
+Trực quan phân bố của từng loại cân nặng
+
+```{r}
+ggplot(diabetes, aes(x = BMI_Category)) + 
+  geom_bar(stat = "count") +
+  labs(title = "Distribution of BMI Categories", x = "BMI Category", y = "Count") +
+  theme_bw()
+
+```
+
+
+Chuyển đổi các giá trị BMI_Category thành factors
+
+```{r}
+diabetes$BMI_Category<- as.factor(diabetes$BMI_Category)
+
+str(diabetes)
+```
+
+Tạo một dataframe bản sao với BMI_Category đã được số hóa
+
+```{r}
+num_diabetes <- diabetes
+
+num_diabetes$BMI_Category <- cut(num_diabetes$BMI, 
+                             breaks = c(-Inf, 18.5, 24.9, 29.9, Inf), 
+                             labels = c(0, 1, 2, 3))
+num_diabetes$BMI_Category <- as.integer(num_diabetes$BMI_Category)
+```
+
+
+Tìm các biến độc lập so với biến phụ thuộc BMI_Category
+
+```{r}
+library(lattice)
+library(reshape2)
+
+# creating correlation matrix
+corr_mat <- round(cor(num_diabetes),2)
+ 
+# reduce the size of correlation matrix
+melted_corr_mat <- melt(corr_mat)
+# head(melted_corr_mat)
+ 
+# plotting the correlation heatmap
+library(ggplot2)
+ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, fill=value)) + geom_tile() +
+  geom_text(aes(Var2, Var1, label = value), color = "white", size = 4)
+```
+
+
+Ta có thể thấy:
+
+* So với BMI_Category, các thuộc tính BMI, Insulin, SkinThickness, BloodPressure và Glucose đều tương quan mạnh (5 thuộc tính)
+
+* Vậy thuộc tính BMI_Category sẽ phụ thuộc nhiều vào chúng, ta có thể xem chúng là các biến độc lập
+
+
+### Seperating the train and test data set
+
+```{r}
+set.seed(123)
+
+model_diabetes <- diabetes[, -9]
+
+samp <- sample(nrow(model_diabetes), 0.8 * nrow(model_diabetes))
+
+train <- model_diabetes[samp, ]
+
+test <- model_diabetes[-samp, ]
+```
+
+
+### Feature Scaling 
+
+```{r}
+train[, 1:8] = scale(train[, 1:8])
+test[, 1:8] = scale(test[, 1:8])
+
+test[, 1:8]
+```
+
+### Fitting SVM to the Training set 
+
+```{r}
+library(e1071) 
+  
+classifier = svm(formula = BMI_Category ~ ., data = train, type = 'C-classification', kernel = 'linear') 
+
+classifier
+```
+### Predicting the Test set results 
+
+```{r}
+pred = predict(classifier, newdata = test[, 1:8]) 
+table(prediction, test$BMI_Category)
+pred
+```
+
+```{r}
+results<-cbind(prediction,test$BMI_Category)
+
+results
+
+colnames(results)<-c('pred','real')
+
+results<-as.data.frame(results)
+
+View(results)
+```
+
+
+```{r}
+sum(prediction==test$BMI_Category) / nrow(test) # The output is as shown below
+```
+Bạn có thể thấy rằng độ chính xác của mô hình này là 98 phần trăm, điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
