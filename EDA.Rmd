@@ -74,17 +74,17 @@ par(mfrow=c(1,3))
 # Boxplot cho Age
 boxplot(diabetes$Age,
         col="#ff0066",
-        main="Boxplot for Descriptive Analysis of Age")
+        main="Boxplot for Age")
 
 # Boxplot cho Pregnancies
 boxplot(diabetes$Pregnancies,
         col="yellow",
-        main="Boxplot for Descriptive Analysis of Pregnancy")
+        main="Boxplot for Pregnancy")
 
 # Boxplot cho Outcome và Glucose theo người mắc bệnh và không
 diabetes_groups <- cut(diabetes$Outcome, c(-Inf, 0, Inf), labels = c("Không bệnh", "Bệnh"))
 
-boxplot(diabetes$Glucose~diabetes_groups, xlab="Outcome", ylab="Glucose (mg/dl)", main="Tỉ lệ giữa Glucose và Outcome ở hai đối tượng", col="pink")
+boxplot(diabetes$Glucose~diabetes_groups, xlab="Outcome", ylab="Glucose (mg/dl)", main="Tỉ lệ giữa Glucose và Outcome", col="pink")
 box(which = "outer", lty = "solid")
 ```
 Ta có thể thấy:
