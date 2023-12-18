@@ -1,2 +1,8 @@
+<<<<<<< HEAD
 .Rproj.user/
 .Rhistory
+=======
+renv
+renv.lock
+.Rproj.user
+>>>>>>> 400ee5c0750532bf78ed6197223a46b97d8bac78
