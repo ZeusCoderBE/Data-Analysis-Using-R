@@ -2,7 +2,9 @@
 title: "ApDungCacMoHinhPhanTich"
 author: "Nhom7_DuLieuVeTieuDuong"
 date: "2023-12-13"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 
@@ -138,7 +140,7 @@ ggplot(melted_diabetes, aes(x = Variable, y = `Z-score`, color = `Z-score`)) +
   labs(x = "Variable", y = "Z-score", title = "Scatter Plots of Z-scores") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Điều chỉnh góc và vị trí của chú thích trên trục x
 ```
-*Drawing scatter plot from the graph, we observe that values >= 700 are outliers*
+*Vẽ biểu đồ phân tán từ biểu đồ, chúng tôi quan sát thấy các giá trị >= 700 là các giá trị ngoại lệ*
 
 
 ```{r}
@@ -149,12 +151,15 @@ diabetes_filter <- diabetes[rowSums(apply(diabetes_z, 2, function(x) abs(x) < 70
 cat("Còn lại số lượng hàng và cột là:", dim(diabetes_filter))
 
 ```
+```{r}
+
+```
 
 ### Correlation between Numeric Variables and Outcomes
 *Drawing boxplot*
 
 ```{r}
-attach(diabetes)
+attach(diabetes_filter)
 par(mfrow=c(2,4))
 boxplot(Pregnancies~Outcome, main="No. of Pregnancies vs. Diabetes", 
         xlab="Outcome", ylab="Pregnancies",col="red")
@@ -174,13 +179,85 @@ boxplot(Age~Outcome, main="Age vs. Diabetes",
 box(which = "outer", lty = "solid")
 ```
 
-## **STEP-3: Build Machine Learning Models**
+*Huyết áp và độ dày của da ít thay đổi với bệnh tiểu đường, chúng sẽ bị loại khỏi mô hình. Các biến khác ít nhiều cho thấy mối tương quan với bệnh tiểu đường nên sẽ được giữ nguyên*
 
-### Logarit Regression
 
 ```{r}
+diabetes_filter $BloodPressure <- NULL
+diabetes_filter $SkinThickness <- NULL
+```
+*Chuẩn hoá dữ liệu về một  thang đo chung *
+
+- *Đảm bảo rằng các biến có thang đo đồng nhất, giúp mô hình học tốt hơn.*
+
+- *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
+- *Phù hợp với các mô hình yêu cầu dữ liệu nằm trong khoảng giá trị cụ thể *.
+
+$$ \text{Scaled Value} = \frac{{\text{max}(X) - \text{min}(X)}}{{X - \text{min}(X)}}$$
+
+```{r}
+min_max_scaler <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+diabetes_filter <- as.data.frame(lapply(diabetes_filter, min_max_scaler))
+diabetes_filter
 
 ```
+
+
+## **STEP-3: Build Machine Learning Models**
+
+### PREDICTING DIABETES using Logarithmic Regression model
+
+```{r}
+train <- diabetes_filter [1:530,]
+test <- diabetes_filter [531:760,]
+model <-glm(Outcome ~.,family=binomial(link='logit'),data=train)
+summary(model)
+```
+
+*"Ba thuộc tính phù hợp nhất, 'Glucose', 'BMI' và 'Mang thai' có giá trị p thấp, cho thấy mức ý nghĩa cao. Điều này cho thấy rằng các biến độc lập này ảnh hưởng đáng kể đến hiệu suất của mô hình hồi quy logistic trong dự đoán 'Kết quả.'* 
+
+*“Insulin” và “Tuổi” không có ý nghĩa thống kê vì giá trị p cao .*
+```{r}
+anova(model, test="Chisq")
+```
+*Bảng "Analysis of Deviance Table" cung cấp thông tin về sự biến động của deviance (độ lệch) khi thêm vào từng biến độc lập vào mô hình*
+
+*Từ bảng độ lệch, chúng ta có thể thấy rằng việc bổ sung insulin và tuổi tác ít ảnh hưởng đến độ lệch còn lại.*
+
+###Cross Validation
+
+*Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh ,0: không mắc bệnh*
+*Tính toán ma trận nhầm lẫn *
+```{r}
+fitted.results <- predict(model,newdata=test,type='response')
+fitted.results <- ifelse(fitted.results > 0.5,1,0)
+(conf_matrix_logi<-table(fitted.results, test$Outcome))
+
+```
+*Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*
+
+```{r}
+TP <- conf_matrix_logi[2, 2]  # True Positive
+TN <- conf_matrix_logi[1, 1]  # True Negative
+FP <- conf_matrix_logi[1, 2]  # False Positive
+FN <- conf_matrix_logi[2, 1]  # False Negative
+
+Accuracy<-(TP+TN)/(TP+TN+FP+FN)
+cat("Độ chính xác:",Accuracy,"\n")
+
+#trong số bệnh nhân thực tế bị bệnh tiểu đường,bao nhiêu phần trăm được dự báo bị bệnh
+Sensitivity<-TP/(TP+FN)
+cat("Độ nhạy:",Sensitivity,"\n")
+#trong số bệnh nhân thực tế không bị bệnh, bao nhiêu phần trăm được dự báo không bị bệnh
+
+Specificity<-TN/(TN+FP)
+cat("Độ đặc hiệu",Specificity)
+
+```
+
 
 
 ### Classifying the categories of Mass (BMI) using Random Forest
@@ -435,3 +512,137 @@ t.test(diabetes$Age, mu=32)
 - p-value nhỏ mức ý nghĩa 5%. 
 - Giống như bất kỳ bài kiểm tra thống kê nào khác , nếu p-value nhỏ hơn mức ý nghĩa thì có thể bác bỏ giả thuyết không.
 --> Dựa vào kết quả kiểm định t-test, có thể kết luận rằng giá trị trung bình thực sự của cột "Age" không bằng 32, và Ước lượng trung bình của mẫu có thể nằm trong khoảng từ 32.41 đến 34.07 với mức tin cậy 95%.
+
+
+### MÔ HÌNH CÂY QUYẾT ĐỊNH
+#### Chia tập dữ liệu thành 2 tập train và test
+
+```{r}
+library(caret)
+```
+
+```{r}
+set.seed(1)
+split <- createDataPartition(df$Outcome,p = 0.75,list = FALSE)
+dfTrain <- df[split,]
+dfTest <- df[-split,]
+```
+
+```{r}
+head(dfTrain)
+```
+
+```{r}
+head(dfTest)
+```
+
+#### Hàm kiểm tra mô hình
+
+```{r}
+# Dùng ma trận nhầm lẫn
+accuracy <- function() {
+  predictions <- predict(model, newdata = dfTest, type = "class")
+  
+  # So sánh giữa giá trị dự đoán và giá trị thực tế
+  confusion_matrix <- table(predictions, dfTest$Outcome)
+  print(confusion_matrix)
+  
+  # Tính toán độ chính xác từ ma trận nhầm lẫn
+  accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+  return (accuracy)
+}
+```
+
+
+#### Xây dựng mô hình cây quyết định 
+
+##### Tính entropy cho các thuộc tính
+```{r}
+# Tính entropy cho từng cột trong dfTrain
+# Hàm tính entropy
+calculate_entropy <- function(attribute_vector) {
+  total_count <- length(attribute_vector)
+  values <- table(attribute_vector)
+  probabilities <- values / total_count
+  entropy <- -sum(probabilities * log2(probabilities))
+  return(entropy)
+}
+
+calculate_entropy_for_columns <- function(data) {
+  entropy_values <- numeric()
+  for (col in names(data)) {
+    entropy <- calculate_entropy(data[[col]])
+    entropy_values <- c(entropy_values, entropy)
+  }
+  names(entropy_values) <- names(data)
+  return(entropy_values)
+}
+
+# Tính entropy cho các cột trong dfTrain
+entropy_values <- calculate_entropy_for_columns(dfTrain)
+entropy_values
+
+```
+
+
+##### Xây dựng mô hình cây quyết định
+```{r}
+# Huấn luyện mô hình cây quyết định
+library(rpart)
+model <- rpart(Outcome ~ Pregnancies + Glucose + BloodPressure + SkinThickness + Insulin + BMI + DiabetesPedigreeFunction + Age, data = dfTrain, method = "class")
+
+# In cây quyết định
+print(model)
+
+# Biểu đồ cây quyết định
+library(rpart.plot)
+rpart.plot(model)
+```
+
+##### Xem độ quan trọng của các thuộc tính trong mô hình
+```{r}
+library(vip)
+var_importance <- vip::vip(model, num_features = 10)
+print(var_importance)
+```
+
+
+```{r}
+library(pdp)
+library(ggplot2)
+
+# Lặp qua từng cột trong dfTrain (loại bỏ cột mục tiêu)
+for (col in names(dfTrain)[-ncol(dfTrain)]) {
+  # Tạo Partial Dependence Plot cho từng cột và lưu vào biến pdp_plot
+  pdp_plot <- partial(model, pred.var = col)
+  
+  # Tạo biểu đồ Partial Dependence Plot và hiển thị
+  plot(pdp_plot, main = paste("Partial Dependence Plot for", col))
+}
+
+```
+Dựa vào biểu đồ mức độ quan trọng của các thuộc tính trong mô hình ta thấy rằng: <br>
+  - Các thuộc tính Pregnancies, BloodPressure, SkinThickness, Insulin có trọng số thấp nhất. <br>
+Dựa vào Partial Dependence Plot (PDP) - Biểu đồ phụ thuộc một phần thấy rằng:<br>
+  - Các thuộc tính Pregnancies, BloodPressure, SkinThickness, Insulin tăng lên nhưng không ảnh hưởng đến kết quả dự đoán của mô hình.<br>
+  
+##### Loại bỏ các thuộc tính trên (Pregnancies, SkinThickness, Insulin)
+###### Loại bỏ Insulin
+```{r}
+model <- rpart(Outcome ~ Pregnancies + Glucose + BloodPressure + SkinThickness + BMI + DiabetesPedigreeFunction + Age, data = dfTrain, method = "class")
+accuracy()
+```
+###### Loại bỏ Insulin và SkinThickness và Pregnancies
+```{r}
+model <- rpart(Outcome ~ Glucose + BloodPressure + BMI + DiabetesPedigreeFunction + Age, data = dfTrain, method = "class")
+rpart.plot(model)
+```
+
+```{r}
+accuracy()
+```
+##### Trích xuất các luật từ cây quyết định
+```{r}
+rules <- rpart.rules(model)
+print(rules)
+```
