@@ -2,7 +2,9 @@
 title: "ApDungCacMoHinhPhanTich"
 author: "Nhom7_DuLieuVeTieuDuong"
 date: "2023-12-13"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 
@@ -149,12 +151,15 @@ diabetes_filter <- diabetes[rowSums(apply(diabetes_z, 2, function(x) abs(x) < 70
 cat("Còn lại số lượng hàng và cột là:", dim(diabetes_filter))
 
 ```
+```{r}
+
+```
 
 ### Correlation between Numeric Variables and Outcomes
 *Drawing boxplot*
 
 ```{r}
-attach(diabetes)
+attach(diabetes_filter)
 par(mfrow=c(2,4))
 boxplot(Pregnancies~Outcome, main="No. of Pregnancies vs. Diabetes", 
         xlab="Outcome", ylab="Pregnancies",col="red")
@@ -178,8 +183,26 @@ box(which = "outer", lty = "solid")
 
 
 ```{r}
-diabetes$BloodPressure <- NULL
-diabetes$SkinThickness <- NULL
+diabetes_filter $BloodPressure <- NULL
+diabetes_filter $SkinThickness <- NULL
+```
+*Chuẩn hoá dữ liệu về một  thang đo chung *
+
+- *Đảm bảo rằng các biến có thang đo đồng nhất, giúp mô hình học tốt hơn.*
+
+- *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
+- *Phù hợp với các mô hình yêu cầu dữ liệu nằm trong khoảng giá trị cụ thể *.
+
+$$ \text{Scaled Value} = \frac{{\text{max}(X) - \text{min}(X)}}{{X - \text{min}(X)}}$$
+
+```{r}
+min_max_scaler <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+diabetes_filter <- as.data.frame(lapply(diabetes_filter, min_max_scaler))
+diabetes_filter
+
 ```
 
 
@@ -188,8 +211,8 @@ diabetes$SkinThickness <- NULL
 ### PREDICTING DIABETES using Logarithmic Regression model
 
 ```{r}
-train <- diabetes[1:530,]
-test <- diabetes[531:760,]
+train <- diabetes_filter [1:530,]
+test <- diabetes_filter [531:760,]
 model <-glm(Outcome ~.,family=binomial(link='logit'),data=train)
 summary(model)
 ```
