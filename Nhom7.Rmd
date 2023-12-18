@@ -537,7 +537,6 @@ head(dfTest)
 ```
 
 #### Hàm kiểm tra mô hình
-
 ```{r}
 # Dùng ma trận nhầm lẫn
 accuracy <- function() {
@@ -553,39 +552,32 @@ accuracy <- function() {
 }
 ```
 
-
-#### Xây dựng mô hình cây quyết định 
-
-##### Tính entropy cho các thuộc tính
 ```{r}
-# Tính entropy cho từng cột trong dfTrain
-# Hàm tính entropy
-calculate_entropy <- function(attribute_vector) {
-  total_count <- length(attribute_vector)
-  values <- table(attribute_vector)
-  probabilities <- values / total_count
-  entropy <- -sum(probabilities * log2(probabilities))
-  return(entropy)
+thongso <- function() {
+  predictions <- predict(model, newdata = dfTest, type = "class")
+  confusion_matrix <- table(predictions, dfTest$Outcome)
+  TP <- confusion_matrix[2, 2]  # True Positive
+  TN <- confusion_matrix[1, 1]  # True Negative
+  FP <- confusion_matrix[1, 2]  # False Positive
+  FN <- confusion_matrix[2, 1]  # False Negative
+  
+  Accuracy<-(TP+TN)/(TP+TN+FP+FN)
+  cat("Độ chính xác:",Accuracy,"\n")
+  
+  #trong số bệnh nhân thực tế bị bệnh tiểu đường,bao nhiêu phần trăm được dự báo bị bệnh
+  Sensitivity<-TP/(TP+FN)
+  cat("Độ nhạy:",Sensitivity,"\n")
+  #trong số bệnh nhân thực tế không bị bệnh, bao nhiêu phần trăm được dự báo không bị bệnh
+  
+  Specificity<-TN/(TN+FP)
+  cat("Độ đặc hiệu",Specificity)
 }
-
-calculate_entropy_for_columns <- function(data) {
-  entropy_values <- numeric()
-  for (col in names(data)) {
-    entropy <- calculate_entropy(data[[col]])
-    entropy_values <- c(entropy_values, entropy)
-  }
-  names(entropy_values) <- names(data)
-  return(entropy_values)
-}
-
-# Tính entropy cho các cột trong dfTrain
-entropy_values <- calculate_entropy_for_columns(dfTrain)
-entropy_values
-
 ```
 
 
-##### Xây dựng mô hình cây quyết định
+
+#### Xây dựng mô hình cây quyết định 
+##### Mô hình cây quyết định
 ```{r}
 # Huấn luyện mô hình cây quyết định
 library(rpart)
@@ -598,6 +590,11 @@ print(model)
 library(rpart.plot)
 rpart.plot(model)
 ```
+
+```{r}
+thongso()
+```
+
 
 ##### Xem độ quan trọng của các thuộc tính trong mô hình
 ```{r}
@@ -631,6 +628,7 @@ Dựa vào Partial Dependence Plot (PDP) - Biểu đồ phụ thuộc một ph�
 ```{r}
 model <- rpart(Outcome ~ Pregnancies + Glucose + BloodPressure + SkinThickness + BMI + DiabetesPedigreeFunction + Age, data = dfTrain, method = "class")
 accuracy()
+thongso()
 ```
 ###### Loại bỏ Insulin và SkinThickness và Pregnancies
 ```{r}
@@ -640,6 +638,7 @@ rpart.plot(model)
 
 ```{r}
 accuracy()
+thongso()
 ```
 ##### Trích xuất các luật từ cây quyết định
 ```{r}
