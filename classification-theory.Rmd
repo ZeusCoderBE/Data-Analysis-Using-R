@@ -67,16 +67,6 @@ ggplot(diabetes, aes(x = BMI_Category)) +
 
 ```
 
-
-Chuyển đổi các giá trị BMI_Category thành factors
-
-```{r}
-diabetes$BMI_Category<- as.factor(diabetes$BMI_Category)
-
-str(diabetes)
-diabetes
-```
-
 Tạo một dataframe bản sao với BMI_Category đã được số hóa
 
 ```{r}
@@ -130,7 +120,7 @@ test <- diabetes[-samp, ]
 Kiểm tra kích thước của tập dữ liệu huấn luyện và kiểm tra:
 
 ```{r}
-paste(dim(test), dim(train))
+dim(train)
 ```
 
 Random forest library
@@ -139,26 +129,42 @@ Random forest library
 library(randomForest) 
 ```
 
+
 Bây giờ chúng ta đã cài đặt xong thư viện RandomForest, chúng ta hãy xây dựng mô hình rừng ngẫu nhiên
 
-* mtry = sqrt(số lượng thuộc tính độc lập)
+```{r}
+X <- train[, -10]
+Y <- train[, 10]
+X
+Y
+```
 
 
 ```{r}
-tuneRF(
-  x = train[,-9],
-  y = train[,9],
+rf_fit <- tuneRF(
+  x = X,
+  y = Y,
+  metric = "OOBAcc",
   ntreeTry = 100,
   mtryStart = 3,
   stepFactor = 1.5,
   improve = 0.01,
   trace = FALSE
 )
+
+# Extract OOB and validation errors
+oob_error <- rf_fit$bestOOB
+val_error <- 1 - rf_fit$bestTune$acc
+
+# Plot the OOB vs. validation error
+plot(oob_error, val_error, type = "b", pch = 20, col = "blue", main = "OOB vs. Validation Error",
+     xlab = "OOB Error (%)", ylab = "Validation Error (%)")
+abline(0, 1, col = "gray", lty = 2) # Add reference line for perfect matching
 ```
 
 
 ```{r}
-model <- randomForest(BMI_Category ~ . - Outcome, data = train, ntree = 100, mtry = mTry)
+model <- randomForest(BMI_Category ~ . - Outcome, data = train, ntree = 100, mtry = 4)
 
 model
 ```
