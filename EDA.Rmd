@@ -61,7 +61,9 @@ str(diabetes)
 summary(diabetes)
 ```
 
-#### Data visualization of age
+#### Data visualization of distribution attributes
+
+##### Distribution of Age, Pregnancies, Glucose and Outcome
 
 ```{r}
 library(ggplot2)
@@ -81,10 +83,14 @@ boxplot(diabetes$Pregnancies,
         col="yellow",
         main="Boxplot for Pregnancy")
 
-# Boxplot cho Outcome và Glucose theo người mắc bệnh và không
-diabetes_groups <- cut(diabetes$Outcome, c(-Inf, 0, Inf), labels = c("Không bệnh", "Bệnh"))
+plot(density(diabetes$Glucose),
+     col="yellow",
+     main="Density Plot for Glucose",
+     xlab="Glucose",
+     ylab="Density")
+polygon(density(diabetes$Glucose),
+        col="#ccff66")
 
-boxplot(diabetes$Glucose~diabetes_groups, xlab="Outcome", ylab="Glucose (mg/dl)", main="Tỉ lệ giữa Glucose và Outcome", col="pink")
 box(which = "outer", lty = "solid")
 ```
 Ta có thể thấy:
@@ -96,19 +102,16 @@ Ta có thể thấy:
 * Từ boxplot giữa nồng độ glucose và kết quả, những người không bệnh sẽ có nồng độ glucose thấp hơn nhóm bị bệnh; nhóm không bệnh có nồng độ glucose tập trung khoảng 99-130 mg/dl, còn nhóm bị bệnh khoảng 130-170 mg/dl
 
 
-#### The mode of Pregnancies and Glucose
+##### The correlation of Glucose, Outcome and Insulin
 
 ```{r}
 par(mfrow=c(1,2))
-plot(diabetes$Insulin, diabetes$Glucose, type='p', col=c("red"), pch=20, main="Scatter Plot for Glucose and Insulin")
+plot(diabetes$Insulin, diabetes$Glucose, type='p', col=c("red"), pch=20, main="Tương quan giữa Glucose và Insulin")
 
-plot(density(diabetes$Glucose),
-     col="yellow",
-     main="Density Plot for Glucose",
-     xlab="Glucose",
-     ylab="Density")
-polygon(density(diabetes$Glucose),
-        col="#ccff66")
+# Boxplot cho Outcome và Glucose theo người mắc bệnh và không
+diabetes_groups <- cut(diabetes$Outcome, c(-Inf, 0, Inf), labels = c("Không bệnh", "Bệnh"))
+boxplot(diabetes$Glucose~diabetes_groups, xlab="Outcome", ylab="Glucose (mg/dl)", main="Tỉ lệ giữa Glucose và Outcome", col="pink")
+
 box(which="outer", lty="solid")
 ```
 
