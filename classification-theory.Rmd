@@ -107,9 +107,9 @@ Ta có thể thấy:
 Chia dữ liệu thành huấn luyện và kiểm tra. 80% dành cho đào tạo, 20% dành cho kiểm tra.
 
 ```{r}
-set.seed(1234)
+set.seed(123)
 
-samp <- sample(nrow(diabetes), 0.5 * nrow(diabetes))
+samp <- sample(nrow(diabetes), 0.7 * nrow(diabetes))
 
 train <- diabetes[samp, ]
 
@@ -123,7 +123,7 @@ Kiểm tra kích thước của tập dữ liệu huấn luyện và kiểm tra:
 dim(train)
 ```
 
-Random forest library
+### Cách 1: Dùng kiểm định thông thường cho RF
 
 ```{r}
 library(randomForest) 
@@ -132,39 +132,26 @@ library(randomForest)
 
 Bây giờ chúng ta đã cài đặt xong thư viện RandomForest, chúng ta hãy xây dựng mô hình rừng ngẫu nhiên
 
-```{r}
-X <- train[, -10]
-Y <- train[, 10]
-X
-Y
-```
 
+Tìm giá trị tốt nhất cho tham số mtry bằng tuneRF
 
 ```{r}
 rf_fit <- tuneRF(
-  x = X,
-  y = Y,
+  x = train[,-9],
+  y = train$BMI_Category,
   metric = "OOBAcc",
   ntreeTry = 100,
   mtryStart = 3,
   stepFactor = 1.5,
   improve = 0.01,
-  trace = FALSE
+  trace = T,
+  plot = T
 )
-
-# Extract OOB and validation errors
-oob_error <- rf_fit$bestOOB
-val_error <- 1 - rf_fit$bestTune$acc
-
-# Plot the OOB vs. validation error
-plot(oob_error, val_error, type = "b", pch = 20, col = "blue", main = "OOB vs. Validation Error",
-     xlab = "OOB Error (%)", ylab = "Validation Error (%)")
-abline(0, 1, col = "gray", lty = 2) # Add reference line for perfect matching
 ```
 
 
 ```{r}
-model <- randomForest(BMI_Category ~ . - Outcome, data = train, ntree = 100, mtry = 4)
+model <- randomForest(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome, data = train, ntree = 100, mtry=3)
 
 model
 ```
@@ -196,36 +183,22 @@ View(results)
 Cuối cùng, tính độ chính xác của mô hình
 
 ```{r}
-
-sum(prediction==test$BMI_Category) / nrow(test) # The output is as shown below
-
+accuracy <- mean(prediction == test$BMI_Category)
+accuracy
 ```
 
-Bạn có thể thấy rằng độ chính xác của mô hình này là 98 phần trăm, điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
+Bạn có thể thấy rằng độ chính xác của mô hình này là khoảng 98 phần trăm, điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
 
 
-### Cách 2: dùng caret
+### Cách 2: dùng cross-validation bằng thư viện caret
 
 ```{r}
 library(caret)
 ```
 
-
-```{r}
-# Chia dữ liệu thành tập huấn luyện và tập kiểm tra
-set.seed(1234)
-
-samp <- sample(nrow(diabetes), 0.8 * nrow(diabetes))
-
-train <- diabetes[samp, ]
-
-test <- diabetes[-samp, ]
-```
-
-
 ```{r}
 # Huấn luyện mô hình Random Forest
-model <- train(BMI_Category ~ ., data = train, method = "rf",metric = "Accuracy" ,trControl = trainControl(
+model_cv <- train(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome, data = train, method = "rf",metric = "Accuracy" ,trControl = trainControl(
               method = "cv",
               number = 5),
               search = "grid")
@@ -235,12 +208,17 @@ model <- train(BMI_Category ~ ., data = train, method = "rf",metric = "Accuracy"
 
 ```{r}
 # Đánh giá mô hình trên tập kiểm tra
-pred <- predict(model, test)
-confusionMatrix(pred, test$BMI_Category)
+pred <- predict(model_cv, newdata=test)
+
+table(pred, test$BMI_Category)
+
+prediction
 ```
 
+
 ```{r}
-sum(pred==test$BMI_Category) / nrow(test)
+accuracy <- mean(pred == test$BMI_Category)
+accuracy
 ```
 
 
@@ -275,6 +253,7 @@ $$
 ```{r}
 t.test(diabetes$BMI, mu=31)
 ```
+
 ### Kết luận và giải thích
 - Từ đầu ra và từ p.value chúng ta thấy rằng
 - p-value nhỏ mức ý nghĩa 5%. 
