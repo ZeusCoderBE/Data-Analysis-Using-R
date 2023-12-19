@@ -35,6 +35,7 @@ diabetes <- read.csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtM
 diabetes
 
 ```
+
 ## **Overall of dataset:** Dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
 
 *Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiều thuộc tính liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về các cột:*
@@ -66,12 +67,12 @@ diabetes
 na_count<-colSums(sapply(diabetes,is.na))
 na_count
 ```
+
 ### Handling Null Values
 
 *There are several ways to handle null values in a dataset.*
 
 *Fill in the missing values with the median value of each column.*
-
 
 ```{r}
 diabetes_median <- diabetes %>%
@@ -174,13 +175,80 @@ boxplot(Age~Outcome, main="Age vs. Diabetes",
 box(which = "outer", lty = "solid")
 ```
 
-## **STEP-3: Build Machine Learning Models**
+*Chuẩn hoá dữ liệu về một  thang đo chung *
 
-### Logarit Regression
+- *Đảm bảo rằng các biến có thang đo đồng nhất, giúp mô hình học tốt hơn.*
+
+- *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
+- *Phù hợp với các mô hình yêu cầu dữ liệu nằm trong khoảng giá trị cụ thể *.
+
+$$ \text{Scaled Value} = \frac{{\text{max}(X) - \text{min}(X)}}{{X - \text{min}(X)}}$$
 
 ```{r}
+min_max_scaler <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+diabetes_scale <- as.data.frame(lapply(diabetes_filter, min_max_scaler))
+diabetes_scale
 
 ```
+
+
+## **STEP-3: Build Machine Learning Models**
+
+### PREDICTING DIABETES using Logarithmic Regression model
+
+```{r}
+train <- diabetes_scale [1:530,]
+test <- diabetes_scale [531:760,]
+model <-glm(Outcome ~.,family=binomial(link='logit'),data=train)
+summary(model)
+```
+
+*"Ba thuộc tính phù hợp nhất, 'Glucose', 'BMI' và 'Mang thai' có giá trị p thấp, cho thấy mức ý nghĩa cao. Điều này cho thấy rằng các biến độc lập này ảnh hưởng đáng kể đến hiệu suất của mô hình hồi quy logistic trong dự đoán 'Kết quả.'* 
+
+*“Insulin” và “Tuổi” không có ý nghĩa thống kê vì giá trị p cao .*
+
+```{r}
+anova(model, test="Chisq")
+```
+*Bảng "Analysis of Deviance Table" cung cấp thông tin về sự biến động của deviance (độ lệch) khi thêm vào từng biến độc lập vào mô hình*
+
+*Từ bảng độ lệch, chúng ta có thể thấy rằng việc bổ sung insulin và tuổi tác ít ảnh hưởng đến độ lệch còn lại.*
+
+###Cross Validation
+
+*Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh ,0: không mắc bệnh*
+*Tính toán ma trận nhầm lẫn *
+```{r}
+fitted.results <- predict(model,newdata=test,type='response')
+fitted.results <- ifelse(fitted.results > 0.5,1,0)
+(conf_matrix_logi<-table(fitted.results, test$Outcome))
+
+```
+
+*Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*
+
+```{r}
+TP <- conf_matrix_logi[2, 2]  # True Positive
+TN <- conf_matrix_logi[1, 1]  # True Negative
+FP <- conf_matrix_logi[1, 2]  # False Positive
+FN <- conf_matrix_logi[2, 1]  # False Negative
+
+Accuracy<-(TP+TN)/(TP+TN+FP+FN)
+cat("Độ chính xác:",Accuracy,"\n")
+
+#trong số bệnh nhân thực tế bị bệnh tiểu đường,bao nhiêu phần trăm được dự báo bị bệnh
+Sensitivity<-TP/(TP+FN)
+cat("Độ nhạy:",Sensitivity,"\n")
+#trong số bệnh nhân thực tế không bị bệnh, bao nhiêu phần trăm được dự báo không bị bệnh
+
+Specificity<-TN/(TN+FP)
+cat("Độ đặc hiệu",Specificity)
+
+```
+
 
 ### Classifying the categories of Mass (BMI)
 
@@ -320,7 +388,7 @@ lines(error_test, type = "l", col = "red")
 #### Huấn luyện mô hình
 
 ```{r}
-model <- randomForest(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome -Pregnancies, data = train, ntree = 100, mtry=4)
+model <- randomForest(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome -Pregnancies, data = train, ntree = 100, mtry=3)
 
 model
 ```
@@ -366,10 +434,7 @@ library(caret)
 #### Huấn luyện mô hình
 
 ```{r}
-model_cv <- train(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome, data = train, method = "rf", metric = "Accuracy" ,trControl = trainControl(
-              method = "cv",
-              number = 5),
-              search = "grid")
+model_cv <- train(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome, data = train, method = "rf", metric = "Accuracy", trControl = trainControl(method = "cv", number = 20, search = "grid"))
 
 ```
 
