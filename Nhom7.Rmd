@@ -144,7 +144,7 @@ ggplot(melted_diabetes, aes(x = Variable, y = `Z-score`, color = `Z-score`)) +
 
 
 ```{r}
-# Lọc các giá trị Z-score mà tất cả đều nhỏ hơn 360
+# Lọc các giá trị Z-score mà tất cả đều nhỏ hơn 700
 diabetes_filter <- diabetes[rowSums(apply(diabetes_z, 2, function(x) abs(x) < 700)) == ncol(diabetes_z), ]
 
 # Hiển thị kích thước của bộ dữ liệu sau khi loại bỏ
@@ -173,23 +173,35 @@ boxplot(DiabetesPedigreeFunction~Outcome, main="Diabetes Pedigree Function vs. D
 boxplot(Age~Outcome, main="Age vs. Diabetes", 
         xlab="Outcome", ylab="Age",col="lightblue")
 box(which = "outer", lty = "solid")
+
+diabetes_f<-diabetes_filter
+```
+*Huyết áp và độ dày của da ít thay đổi với bệnh tiểu đường, chúng sẽ bị loại khỏi mô hình. Các biến khác ít nhiều cho thấy mối tương quan với bệnh tiểu đường nên sẽ được giữ nguyên*
+
+```{r}
+diabetes_f $BloodPressure <- NULL
+diabetes_f $SkinThickness <- NULL
 ```
 
 *Chuẩn hoá dữ liệu về một  thang đo chung *
 
-- *Đảm bảo rằng các biến có thang đo đồng nhất, giúp mô hình học tốt hơn.*
+- *Đảm bảo rằng các biến có thang đo đồng nhất.Miền giá trị nằm trong khoảng (0-1), giúp mô hình học tốt hơn.*
 
 - *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
-- *Phù hợp với các mô hình yêu cầu dữ liệu nằm trong khoảng giá trị cụ thể *.
 
-$$ \text{Scaled Value} = \frac{{\text{max}(X) - \text{min}(X)}}{{X - \text{min}(X)}}$$
+
+
+$$ \text{Scaled Value} = \frac{{X - \text{min}(X)}}{{\text{max}(X) - \text{min}(X)}} $$
+
+
+
 
 ```{r}
 min_max_scaler <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
 
-diabetes_scale <- as.data.frame(lapply(diabetes_filter, min_max_scaler))
+diabetes_scale <- as.data.frame(lapply(diabetes_f, min_max_scaler))
 diabetes_scale
 
 ```
@@ -248,7 +260,7 @@ Specificity<-TN/(TN+FP)
 cat("Độ đặc hiệu",Specificity)
 
 ```
-
+*Dựa trên các con số này. Ta thể kết luận rằng mô hình  có độ chính xác khá cao. Đối với việc dự đoán bệnh nhân bị bệnh tiểu đường, mô hình có độ nhạy là 73.77%, và đối với việc dự đoán bệnh nhân không bị bệnh tiểu đường, độ đặc hiệu là 80.47%. Điều này cung cấp cái nhìn chi tiết hơn về hiệu suất của mô hình trong từng khía cạnh cụ thể*
 
 ## Ma trận tương quan
 
