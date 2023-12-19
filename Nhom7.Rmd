@@ -295,6 +295,7 @@ rf_fit <- tuneRF(
 )
 ```
 
+
 ```{r}
 # Lặp lại quá trình huấn luyện và đánh giá trên các giá trị khác nhau của ntree
 error_out_of_bag <- c()
