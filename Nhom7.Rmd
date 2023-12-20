@@ -2,13 +2,14 @@
 title: "ApDungCacMoHinhPhanTich"
 author: "Nhom7_DuLieuVeTieuDuong"
 date: "2023-12-13"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 
 
 ```{r}
-
 install.packages("readr")
 install.packages("dylyr")
 install.packages("tidyr")
@@ -30,7 +31,7 @@ library(ggplot2)
 ```{r}
 
 # Đọc file CSV trực tiếp từ đường link
-diabetes <- read_csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
+diabetes <- read.csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
 # Hiển thị dữ liệu
 diabetes
 
