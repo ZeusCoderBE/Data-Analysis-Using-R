@@ -373,16 +373,16 @@ display: none;
 ## These packages will be installed into &quot;E:/Nam_Hoc_2023-2024/R/Project_R/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
 ## 
 ## # Installing packages --------------------------------------------------------
-## - Installing readr ...                          OK [copied from cache in 0.35s]
-## Successfully installed 1 package in 0.39 seconds.</code></pre>
+## - Installing readr ...                          OK [copied from cache in 0.26s]
+## Successfully installed 1 package in 0.3 seconds.</code></pre>
 <pre class="r"><code>install.packages(&quot;dplyr&quot;)</code></pre>
 <pre><code>## The following package(s) will be installed:
 ## - dplyr [1.1.4]
 ## These packages will be installed into &quot;E:/Nam_Hoc_2023-2024/R/Project_R/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
 ## 
 ## # Installing packages --------------------------------------------------------
-## - Installing dplyr ...                          OK [copied from cache in 0.36s]
-## Successfully installed 1 package in 0.4 seconds.</code></pre>
+## - Installing dplyr ...                          OK [copied from cache in 0.35s]
+## Successfully installed 1 package in 0.39 seconds.</code></pre>
 <pre class="r"><code>install.packages(&quot;tidyr&quot;)</code></pre>
 <pre><code>## The following package(s) will be installed:
 ## - tidyr [1.3.0]
@@ -390,15 +390,15 @@ display: none;
 ## 
 ## # Installing packages --------------------------------------------------------
 ## - Installing tidyr ...                          OK [copied from cache in 0.36s]
-## Successfully installed 1 package in 0.39 seconds.</code></pre>
+## Successfully installed 1 package in 0.4 seconds.</code></pre>
 <pre class="r"><code>install.packages(&quot;ggplot2&quot;)</code></pre>
 <pre><code>## The following package(s) will be installed:
 ## - ggplot2 [3.4.4]
 ## These packages will be installed into &quot;E:/Nam_Hoc_2023-2024/R/Project_R/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
 ## 
 ## # Installing packages --------------------------------------------------------
-## - Installing ggplot2 ...                        OK [copied from cache in 0.25s]
-## Successfully installed 1 package in 0.29 seconds.</code></pre>
+## - Installing ggplot2 ...                        OK [copied from cache in 0.24s]
+## Successfully installed 1 package in 0.28 seconds.</code></pre>
 <pre class="r"><code>library(readr)
 library(dplyr)</code></pre>
 <pre><code>## 
@@ -976,11 +976,11 @@ library(reshape2)</code></pre>
 ##     smiths</code></pre>
 <pre class="r"><code># creating correlation matrix
 corr_mat &lt;- round(cor(num_diabetes),2)
- 
+
 # reduce the size of correlation matrix
 melted_corr_mat &lt;- melt(corr_mat)
 # head(melted_corr_mat)
- 
+
 # plotting the correlation heatmap
 library(ggplot2)
 ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, fill=value)) + geom_tile() +
@@ -1214,7 +1214,14 @@ kable(summary(select(diabetes_filter, BMI)), format = &quot;markdown&quot;)</cod
 H_0: bmi = 31
 \]</span> <span class="math display">\[
 H_a: bmi \neq 31
-\]</span></p>
+\]</span> $$ t = \ {x} \</p>
+<p>_0 \</p>
+<p>s \</p>
+<p>n $$</p>
+<pre class="r"><code># Tính độ lệch chuẩn của mẫu dữ liệu
+standard_deviation &lt;- sd(diabetes_filter$BMI)
+print(standard_deviation)</code></pre>
+<pre><code>## [1] 7.902608</code></pre>
 <pre class="r"><code>t.test(diabetes_filter$BMI, mu=31)</code></pre>
 <pre><code>## 
 ##  One Sample t-test
@@ -1263,12 +1270,26 @@ ggplot(diabetes_filter, aes(x = BMI_Category)) +
 H_0: bmi_0 = bmi_1
 \]</span> <span class="math display">\[
 H_a: bmi_0 \neq bmi_1
-\]</span></p>
+\]</span> $$</p>
+<p>t = \ ({x}_A) \ ({x}_B) \</p>
+<p>(s_A) \ (s_B) \</p>
+<p>(n_A) \ (n_B) \</p>
+<p>$$</p>
 <pre class="r"><code>#lấy ra những người bệnh và không bệnh có chỉ số BMI_Category &gt;= 3
 sick &lt;- num_diabetes[num_diabetes$Outcome==1 &amp; num_diabetes$BMI_Category &gt;= 3,10]
 normal &lt;- num_diabetes[num_diabetes$Outcome==0 &amp; num_diabetes$BMI_Category &gt;= 3,10]
-
-t.test(normal,sick,var.equal=FALSE)</code></pre>
+length(sick)</code></pre>
+<pre><code>## [1] 255</code></pre>
+<pre class="r"><code>length(normal)</code></pre>
+<pre><code>## [1] 389</code></pre>
+<pre class="r"><code># Tính độ lệch chuẩn của mỗi mẫu dữ liệu
+sa &lt;- sd(sick)
+print(sa)</code></pre>
+<pre><code>## [1] 0.3643865</code></pre>
+<pre class="r"><code>sb &lt;- sd(normal)
+print(sb)</code></pre>
+<pre><code>## [1] 0.4798293</code></pre>
+<pre class="r"><code>t.test(normal,sick,var.equal=FALSE)</code></pre>
 <pre><code>## 
 ##  Welch Two Sample t-test
 ## 

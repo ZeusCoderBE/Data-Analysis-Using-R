@@ -1,5 +1,4 @@
 
-
 <link rel="stylesheet" type="text/css" href="styles.css">
 <br>
 <img src="https://fit.hcmute.edu.vn/Resources/Images/SubDomain/fit/HCMUTE-fit.png" alt="ảnh đồ án" class="custom-image-class">
@@ -484,11 +483,11 @@ library(reshape2)
 
 # creating correlation matrix
 corr_mat <- round(cor(num_diabetes),2)
- 
+
 # reduce the size of correlation matrix
 melted_corr_mat <- melt(corr_mat)
 # head(melted_corr_mat)
- 
+
 # plotting the correlation heatmap
 library(ggplot2)
 ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, fill=value)) + geom_tile() +
@@ -665,7 +664,21 @@ $$
 $$ 
 H_a: bmi \neq 31
 $$
+$$
+t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}} \\
+\bar{x} \text{: là giá trị trung bình của mẫu.} \\
+
+\mu_0 \text{: là giá trị trung bình đã biết đến hoặc giả định.}\\
+
+s \text{: là độ lệch chuẩn của mẫu.}\\
+
+n \text{: là kích thước mẫu.}
+$$
 ```{r}
+# Tính độ lệch chuẩn của mẫu dữ liệu
+standard_deviation <- sd(diabetes_filter$BMI)
+print(standard_deviation)
+
 t.test(diabetes_filter$BMI, mu=31)
 ```
 
@@ -696,11 +709,35 @@ $$
 $$ 
 H_a: bmi_0 \neq bmi_1
 $$
+$$
+
+t = \frac{\bar{x}_A - \bar{x}_B}{\sqrt{\frac{s_A^2}{n_A} + \frac{s_B^2}{n_B}}} \\
+(\bar{x}_A) \text{: là giá trị trung bình của nhóm A.} \\
+(\bar{x}_B) \text{: là giá trị trung bình của nhóm B.} \\
+
+(s_A) \text{: là độ lệch chuẩn của nhóm A.} \\
+(s_B) \text{: là độ lệch chuẩn của nhóm B.} \\
+
+(n_A) \text{: là kích thước của nhóm A.} \\
+(n_B) \text{: là kích thước của nhóm B.}\\
+
+$$
+
 ```{r}
 #lấy ra những người bệnh và không bệnh có chỉ số BMI_Category >= 3
 sick <- num_diabetes[num_diabetes$Outcome==1 & num_diabetes$BMI_Category >= 3,10]
 normal <- num_diabetes[num_diabetes$Outcome==0 & num_diabetes$BMI_Category >= 3,10]
+length(sick)
+length(normal)
+# Tính độ lệch chuẩn của mỗi mẫu dữ liệu
+sa <- sd(sick)
+print(sa)
 
+sb <- sd(normal)
+print(sb)
+```
+
+```{r}
 t.test(normal,sick,var.equal=FALSE)
 ```
 
