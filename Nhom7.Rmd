@@ -485,9 +485,9 @@ Ta có thể thấy:
 ### Chia dữ liệu thành huấn luyện và kiểm tra. 80% dành cho đào tạo, 20% dành cho kiểm tra.
 
 ```{r}
-set.seed(12)
+set.seed(1234)
 
-samp <- sample(nrow(diabetes_filter), 0.5 * nrow(diabetes_filter))
+samp <- sample(nrow(diabetes_filter), 0.7 * nrow(diabetes_filter))
 
 train <- diabetes_filter[samp, ]
 
@@ -496,7 +496,7 @@ test <- diabetes_filter[-samp, ]
 
 ```{r}
 #Kiểm tra kích thước của tập dữ liệu huấn luyện và kiểm tra
-dim(train)
+str(train)
 ```
 
 ### Cách 1: Dùng kiểm định thông thường cho RF
@@ -509,8 +509,8 @@ library(randomForest)
 
 ```{r}
 rf_fit <- tuneRF(
-  x = train[,-9],
-  y = train$BMI_Category,
+  x = train[, 1:8],
+  y = train[, 10],
   metric = "OOBAcc",
   ntreeTry = 100,
   mtryStart = 3,
@@ -525,29 +525,25 @@ rf_fit <- tuneRF(
 ```{r}
 # Lặp lại quá trình huấn luyện và đánh giá trên các giá trị khác nhau của ntree
 error_out_of_bag <- c()
-error_test <- c()
+
 for (ntree in 1:100) {
     # Huấn luyện mô hình
-    model <- randomForest(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome -Pregnancies, data = train, ntree = ntree, mtry=3)
+    model <- randomForest(BMI_Category ~ . -Outcome, data = train, ntree = ntree, mtry=3)
 
     # Tính lỗi ra ngoài túi
     error_out_of_bag[ntree] <- mean(predict(model, train) != train$BMI_Category)
-
-    # Tính lỗi kiểm tra
-    error_test[ntree] <- mean(predict(model, test) != test$BMI_Category)
 }
 
 # Vẽ đường cong lỗi
-plot(error_out_of_bag, type = "l", col = "blue", ylab = "OOB error", xlab="Số cây trong rừng")
-lines(error_test, type = "l", col = "red")
+plot(error_out_of_bag, type = "l", col = "red", ylab = "OOB error", xlab="Số cây trong rừng")
 ```
 
 
 #### Huấn luyện mô hình
 
 ```{r}
-model <- randomForest(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome -Pregnancies, data = train, ntree = 100, mtry=3)
-
+#model <- randomForest(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome -Pregnancies, data = train, ntree = 100, mtry=3)
+model <- randomForest(BMI_Category ~ . -Outcome, data = train, ntree = 100, mtry=3)
 model
 ```
 
@@ -580,7 +576,7 @@ accuracy <- mean(prediction == test$BMI_Category)
 accuracy
 ```
 
-Bạn có thể thấy rằng độ chính xác của mô hình này là khoảng 98 phần trăm, điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
+Bạn có thể thấy rằng độ chính xác của mô hình này là khoảng 98-99 (%), điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
 
 
 ### Cách 2: dùng cross-validation bằng thư viện caret
