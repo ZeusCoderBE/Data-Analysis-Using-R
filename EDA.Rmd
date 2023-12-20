@@ -5,7 +5,7 @@
 <br>
 <div>
 <h1 style="color:red; text-align: center;">**NHÓM 7 DỮ LIỆU VỀ TIỂU ĐƯỜNG **</h1>
-<h1 style="color:black; text-align: center;">**EDA **</h1>
+<h1 style="color:black; text-align: center;">**Thăm dò tập dữ liệu Pima Indian Diabetes **</h1>
 <h4 style="text-align: center;">*date: 2023-12-13*</h4>
 </div>
 <br>
