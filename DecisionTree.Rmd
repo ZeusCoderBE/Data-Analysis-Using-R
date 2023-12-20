@@ -156,7 +156,6 @@ calculate_entropy_for_columns <- function(data) {
 # Tính entropy cho các cột trong dfTrain
 entropy_values <- calculate_entropy_for_columns(dfTrain)
 entropy_values
-
 ```
 
 
