@@ -1,7 +1,14 @@
----
-title: "R Notebook"
-output: html_notebook
----
+<link rel="stylesheet" type="text/css" href="styles.css">
+<br>
+<img src="https://fit.hcmute.edu.vn/Resources/Images/SubDomain/fit/HCMUTE-fit.png" alt="ảnh đồ án" class="custom-image-class">
+<br>
+<br>
+<div>
+<h1 style="color:red; text-align: center;">**NHÓM 7 DỮ LIỆU VỀ TIỂU ĐƯỜNG **</h1>
+<h1 style="color:black; text-align: center;">**EDA **</h1>
+<h4 style="text-align: center;">*date: 2023-12-13*</h4>
+</div>
+<br>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -22,9 +29,9 @@ install.packages('ggplot2')
 library(reader)
 
 # Đọc file CSV trực tiếp từ đường link
-diabetes <- read_csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
+diabetes <- read.csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
 # Hiển thị dữ liệu
-diabetes
+head(diabetes)
 ```
 
 ### Overall of dataset: dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
@@ -61,11 +68,16 @@ str(diabetes)
 summary(diabetes)
 ```
 
-#### Data visualization of age
+#### Data visualization of distribution attributes
+
+##### Distribution of Age, Pregnancies, Glucose and Outcome
 
 ```{r}
+#install.packages("cowplot")
+#install.packages("gridExtra")
 library(ggplot2)
 library(cowplot)
+library(gridExtra)
 ```
 
 ```{r}
@@ -73,17 +85,21 @@ par(mfrow=c(1,3))
 # Boxplot cho Age
 boxplot(diabetes$Age,
         col="#ff0066",
-        main="Boxplot for Descriptive Analysis of Age")
+        main="Boxplot for Age")
 
 # Boxplot cho Pregnancies
 boxplot(diabetes$Pregnancies,
         col="yellow",
-        main="Boxplot for Descriptive Analysis of Pregnancy")
+        main="Boxplot for Pregnancy")
 
-# Boxplot cho Outcome và Glucose theo người mắc bệnh và không
-diabetes_groups <- cut(diabetes$Outcome, c(-Inf, 0, Inf), labels = c("Không bệnh", "Bệnh"))
+plot(density(diabetes$Glucose),
+     col="yellow",
+     main="Density Plot for Glucose",
+     xlab="Glucose",
+     ylab="Density")
+polygon(density(diabetes$Glucose),
+        col="#ccff66")
 
-boxplot(diabetes$Glucose~diabetes_groups, xlab="Outcome", ylab="Glucose (mg/dl)", main="Tỉ lệ giữa Glucose và Outcome ở hai đối tượng", col="pink")
 box(which = "outer", lty = "solid")
 ```
 Ta có thể thấy:
@@ -95,19 +111,16 @@ Ta có thể thấy:
 * Từ boxplot giữa nồng độ glucose và kết quả, những người không bệnh sẽ có nồng độ glucose thấp hơn nhóm bị bệnh; nhóm không bệnh có nồng độ glucose tập trung khoảng 99-130 mg/dl, còn nhóm bị bệnh khoảng 130-170 mg/dl
 
 
-#### The mode of Pregnancies and Glucose
+##### The correlation of Glucose, Outcome and Insulin
 
 ```{r}
 par(mfrow=c(1,2))
-plot(Insulin, Glucose, type='p', col=c("red"), pch=20, main="Scatter Plot for Glucose and Insulin")
+plot(diabetes$Insulin, diabetes$Glucose, type='p', col=c("red"), pch=20, main="Tương quan giữa Glucose và Insulin")
 
-plot(density(diabetes$Glucose),
-     col="yellow",
-     main="Density Plot for Glucose",
-     xlab="Glucose",
-     ylab="Density")
-polygon(density(diabetes$Glucose),
-        col="#ccff66")
+# Boxplot cho Outcome và Glucose theo người mắc bệnh và không
+diabetes_groups <- cut(diabetes$Outcome, c(-Inf, 0, Inf), labels = c("Không bệnh", "Bệnh"))
+boxplot(diabetes$Glucose~diabetes_groups, xlab="Outcome", ylab="Glucose (mg/dl)", main="Tỉ lệ giữa Glucose và Outcome", col="pink")
+
 box(which="outer", lty="solid")
 ```
 
@@ -145,7 +158,7 @@ p3 <- ggplot(data = diabetes, aes(x = Pregnancies, y = Outcome)) +
 
 grid.arrange(p1, p2, p3, ncol = 3)
 ```
-Ta có thể thấy
+<br> Ta có thể thấy
 
 * Theo đường hồi quy dương trên, số lần mang thai hoặc nồng độ glucose càng tăng thì tỉ lệ mắc bệnh tiểu đường càng cao
 
@@ -167,7 +180,7 @@ for (col in colnames(diabetes)) {
 
 #### Kiểm tra giá trị ngoại lai
 
-Tìm giá trị ngoại lai
+##### Tìm giá trị ngoại lai
 
 ```{r}
 find_outliers <- function(inp, na.rm = TRUE) {
@@ -181,7 +194,7 @@ find_outliers <- function(inp, na.rm = TRUE) {
 
 ```
 
-Lập tỉ lệ outliers trong cột tương ứng
+##### Lập tỉ lệ outliers trong cột tương ứng
 
 ```{r}
 calculate_rate <- function(inp) {
@@ -205,12 +218,10 @@ for (col in colnames(diabetes)) {
 }
 ```
 
-Vẽ trực quan tỉ lệ ngoại lai
+##### Vẽ trực quan tỉ lệ ngoại lai
 
 ```{r}
-outlier_col = c("BloodPressure", "Insulin", "BMI", "DiabetesPedigreeFunction")
-
-for (col in outlier_col) {
+pie_outlier <- function(outlier_col) {for (col in outlier_col) {
   rates <- calculate_rate(unlist(diabetes[, col]))
   
   pie_data <- data.frame(
@@ -219,14 +230,19 @@ for (col in outlier_col) {
   )
   
   # Vẽ trực quan những cột có tỉ lệ ngoại lai >= 2.3%
-  print(ggplot(pie_data, aes(x="", y = rate, fill=type)) +
+  return(ggplot(pie_data, aes(x="", y = rate, fill=type)) +
   geom_bar(stat="identity", width=1, color="white") +
   coord_polar("y", start=0) +
   theme_void() +
-  labs(title = paste("Outlier Rate vs Regular Value Rate in", col),
+  labs(title = paste(col),
      caption = paste0("Total Outliers (%):", round(rates$outlier, 2), ", Regular Values (%):", round(rates$regular, 2))))
-}
+}}
 ```
+
+```{r}
+grid.arrange(pie_outlier("BloodPressure"), pie_outlier("Insulin"), pie_outlier("BMI"), pie_outlier("DiabetesPedigreeFunction"), ncol=2)
+```
+
 
 #### Kiểm tra độ tương quan của các thuộc tính
 
@@ -255,32 +271,4 @@ Ta có thể thấy:
 * Glucose, BMI và Age ảnh hưởng tới kết quả mắc bệnh lớn nhất với 0.47, 0.29, 0.24
 
 * SkinThickness, BloodPressure ảnh hưởng tới kết quả mắc bệnh yếu nhất với 0.7
-
-
-## Classifying the categories of Mass (BMI)
-
-The World Health Organization (WHO) classifies adults based on the following BMI ranges:
-
-* Underweight: < 18.5 kg/m^2
-
-* Normal weight: 18.5 - 24.9 kg/m^2
-
-* Overweight: 25.0 - 29.9 kg/m^2
-
-* Obese: ≥ 30.0 kg/m^2
-
-```{r}
-diabetes$BMI_Category <- cut(diabetes$BMI, 
-                             breaks = c(-Inf, 18.5, 24.9, 29.9, Inf), 
-                             labels = c("Underweight", "Normal", "Overweight", "Obese"))
-
-```
-
-```{r}
-ggplot(diabetes, aes(x = BMI_Category)) + 
-  geom_bar(stat = "count") +
-  labs(title = "Distribution of BMI Categories", x = "BMI Category", y = "Count") +
-  theme_bw()
-
-```
 
