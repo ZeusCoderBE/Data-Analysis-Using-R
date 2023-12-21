@@ -1,63 +1,82 @@
----
-title: "ApDungCacMoHinhPhanTich"
-author: "Nhom7_DuLieuVeTieuDuong"
-date: "2023-12-13"
-output: html_notebook
----
 
+<link rel="stylesheet" type="text/css" href="styles.css">
+<br>
+<img src="https://fit.hcmute.edu.vn/Resources/Images/SubDomain/fit/HCMUTE-fit.png" alt="ảnh đồ án" class="custom-image-class">
+<br>
+<br>
+<div>
 
+<h1 style="color:red; text-align: center;">
+
+**NHÓM 7 DỮ LIỆU VỀ TIỂU ĐƯỜNG**
+
+</h1>
+
+<h4 style="text-align: center;">
+
+*date: 2023-12-13*
+
+</h4>
+
+</div>
+
+<br>
+
+<h3>**Chuẩn bị các thư viện**</h3>
 
 ```{r}
-
 install.packages("readr")
-install.packages("dylyr")
+install.packages("dplyr")
 install.packages("tidyr")
 install.packages("ggplot2")
 ```
 
-
+ 
 ```{r}
-library(readr)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
+  library(readr)
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
 ```
 
-
 ## **STEP-1 : Importing Diabetes Data from Google Drive**
-
 
 ```{r}
 
 # Đọc file CSV trực tiếp từ đường link
 diabetes <- read.csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
 # Hiển thị dữ liệu
-diabetes
+head(diabetes)
+dim(diabetes)
 
 ```
 
 ## **Overall of dataset:** Dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
 
-*Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiều thuộc tính liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về các cột:*
+*Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiều thuộc tính
+liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về các cột:*
 
-- **Mang thai:** Số lần người phụ nữ đã mang thai.
+-   **Mang thai:** Số lần người phụ nữ đã mang thai.
 
-- **Glucose:** Nồng độ glucose trong huyết tương của người phụ nữ.
+-   **Glucose:** Nồng độ glucose trong huyết tương của người phụ nữ.
 
-- **Huyết áp:** Đo huyết áp.
+-   **Huyết áp:** Đo huyết áp.
 
-- **Độ dày của da:** Độ dày của nếp gấp da ở cơ tam đầu.
+-   **Độ dày của da:** Độ dày của nếp gấp da ở cơ tam đầu.
 
-- **Insulin:** Nồng độ insulin trong máu.
+-   **Insulin:** Nồng độ insulin trong máu.
 
-- **BMI (Chỉ số khối cơ thể):** Thước đo lượng mỡ trong cơ thể dựa trên chiều cao và cân nặng.
+-   **BMI (Chỉ số khối cơ thể):** Thước đo lượng mỡ trong cơ thể dựa
+    trên chiều cao và cân nặng.
 
-- **Chức năng phả hệ bệnh tiểu đường:** Một chức năng cho thấy khả năng mắc bệnh tiểu đường dựa trên tiền sử gia đình.
+-   **Chức năng phả hệ bệnh tiểu đường:** Một chức năng cho thấy khả
+    năng mắc bệnh tiểu đường dựa trên tiền sử gia đình.
 
-- **Tuổi:** Tuổi của người phụ nữ.
+-   **Tuổi:** Tuổi của người phụ nữ.
 
-- **Kết quả:** Biến mục tiêu cho biết người phụ nữ có mắc bệnh tiểu đường hay không (1 đối với bệnh nhân tiểu đường, 0 đối với người không mắc bệnh tiểu đường).
-
+-   **Kết quả:** Biến mục tiêu cho biết người phụ nữ có mắc bệnh tiểu
+    đường hay không (1 đối với bệnh nhân tiểu đường, 0 đối với người
+    không mắc bệnh tiểu đường).
 
 ### Check for Null Values
 
@@ -81,13 +100,13 @@ mutate_all(~ ifelse(is.na(.), median(., na.rm = TRUE), .))
 
 *fill in the missing values with the mean value of each column*
 
-
 ```{r}
 diabetes_mean <- diabetes %>%
 mutate_all(~ ifelse(is.na(.), mean(., na.rm = TRUE), .))
 ```
 
 *fill in the missing values with the common value of each column*
+
 ```{r}
 
 fill_mode <- function(x) {
@@ -104,7 +123,8 @@ mutate_all(fill_mode)
 
 ### Handling Outliers
 
-*Z-score (z-score standardization) is a method for handling outliers. It is calculated using the following formula:*
+*Z-score (z-score standardization) is a method for handling outliers. It
+is calculated using the following formula:*
 
 $$
 Z = \frac{{X - \bar{X}}}{{\sigma}}
@@ -112,22 +132,22 @@ $$
 
 *where:*
 
-- \( X \) is the specific value.
+-   $X$ is the specific value.
 
-- \( \bar{X} \) is the mean of the variable.
+-   $\bar{X}$ is the mean of the variable.
 
-- \( \sigma \) is the standard deviation of the variable.
+-   $\sigma$ is the standard deviation of the variable.
 
-*This method helps standardize the data and identify values that deviate significantly from the mean.*
-
+*This method helps standardize the data and identify values that deviate
+significantly from the mean.*
 
 ```{r}
 diabetes_z <- (diabetes - colMeans(diabetes)) / apply(diabetes, 2, sd)
-diabetes_z
+head(diabetes_z)
 
 ```
 
-*Drawing scatter plot from the graph*
+#### Drawing scatter plot from the graph
 
 ```{r}
 
@@ -140,8 +160,7 @@ ggplot(melted_diabetes, aes(x = Variable, y = `Z-score`, color = `Z-score`)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Điều chỉnh góc và vị trí của chú thích trên trục x
 ```
 
-*Drawing scatter plot from the graph, we observe that values >= 700 are outliers*
-
+#### Drawing scatter plot from the graph, we observe that values \>= 700 are outliers
 
 ```{r}
 # Lọc các giá trị Z-score mà tất cả đều nhỏ hơn 700
@@ -152,6 +171,7 @@ cat("Còn lại số lượng hàng và cột là:", dim(diabetes_filter))
 ```
 
 ### Correlation between Numeric Variables and Outcomes
+
 *Drawing boxplot*
 
 ```{r}
@@ -183,18 +203,14 @@ diabetes_f $BloodPressure <- NULL
 diabetes_f $SkinThickness <- NULL
 ```
 
-*Chuẩn hoá dữ liệu về một  thang đo chung *
+*Chuẩn hoá dữ liệu về một thang đo chung*
 
-- *Đảm bảo rằng các biến có thang đo đồng nhất.Miền giá trị nằm trong khoảng (0-1), giúp mô hình học tốt hơn.*
+-   *Đảm bảo rằng các biến có thang đo đồng nhất.Miền giá trị nằm trong
+    khoảng (0-1), giúp mô hình học tốt hơn.*
 
-- *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
-
-
+-   *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
 
 $$ \text{Scaled Value} = \frac{{X - \text{min}(X)}}{{\text{max}(X) - \text{min}(X)}} $$
-
-
-
 
 ```{r}
 min_max_scaler <- function(x) {
@@ -202,12 +218,10 @@ min_max_scaler <- function(x) {
 }
 
 diabetes_scale <- as.data.frame(lapply(diabetes_f, min_max_scaler))
-diabetes_scale
+head(diabetes_scale)
 
 ```
 
-
-## **STEP-3: Build Machine Learning Models**
 
 ### PREDICTING DIABETES using Logarithmic Regression model
 
@@ -218,21 +232,28 @@ model <-glm(Outcome ~.,family=binomial(link='logit'),data=train)
 summary(model)
 ```
 
-*"Ba thuộc tính phù hợp nhất, 'Glucose', 'BMI' và 'Mang thai' có giá trị p thấp, cho thấy mức ý nghĩa cao. Điều này cho thấy rằng các biến độc lập này ảnh hưởng đáng kể đến hiệu suất của mô hình hồi quy logistic trong dự đoán 'Kết quả.'* 
+*"Ba thuộc tính phù hợp nhất, 'Glucose', 'BMI' và 'Mang thai' có giá trị
+p thấp, cho thấy mức ý nghĩa cao. Điều này cho thấy rằng các biến độc
+lập này ảnh hưởng đáng kể đến hiệu suất của mô hình hồi quy logistic
+trong dự đoán 'Kết quả.'*
 
-*“Insulin” và “Tuổi” không có ý nghĩa thống kê vì giá trị p cao .*
+*"Insulin" và "Tuổi" không có ý nghĩa thống kê vì giá trị p cao .*
 
 ```{r}
 anova(model, test="Chisq")
 ```
-*Bảng "Analysis of Deviance Table" cung cấp thông tin về sự biến động của deviance (độ lệch) khi thêm vào từng biến độc lập vào mô hình*
 
-*Từ bảng độ lệch, chúng ta có thể thấy rằng việc bổ sung insulin và tuổi tác ít ảnh hưởng đến độ lệch còn lại.*
+*Bảng "Analysis of Deviance Table" cung cấp thông tin về sự biến động
+của deviance (độ lệch) khi thêm vào từng biến độc lập vào mô hình*
+
+*Từ bảng độ lệch, chúng ta có thể thấy rằng việc bổ sung insulin và tuổi
+tác ít ảnh hưởng đến độ lệch còn lại.*
 
 ###Cross Validation
 
-*Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh ,0: không mắc bệnh*
-*Tính toán ma trận nhầm lẫn *
+*Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh
+,0: không mắc bệnh* *Tính toán ma trận nhầm lẫn*
+
 ```{r}
 fitted.results <- predict(model,newdata=test,type='response')
 fitted.results <- ifelse(fitted.results > 0.5,1,0)
@@ -260,39 +281,49 @@ Specificity<-TN/(TN+FP)
 cat("Độ đặc hiệu",Specificity)
 
 ```
-*Dựa trên các con số này. Ta thể kết luận rằng mô hình  có độ chính xác khá cao. Đối với việc dự đoán bệnh nhân bị bệnh tiểu đường, mô hình có độ nhạy là 73.77%, và đối với việc dự đoán bệnh nhân không bị bệnh tiểu đường, độ đặc hiệu là 80.47%. Điều này cung cấp cái nhìn chi tiết hơn về hiệu suất của mô hình trong từng khía cạnh cụ thể*
 
-## Ma trận tương quan
+*Dựa trên các con số này. Ta thể kết luận rằng mô hình có độ chính xác
+khá cao. Đối với việc dự đoán bệnh nhân bị bệnh tiểu đường, mô hình có
+độ nhạy là 73.77%, và đối với việc dự đoán bệnh nhân không bị bệnh tiểu
+đường, độ đặc hiệu là 80.47%. Điều này cung cấp cái nhìn chi tiết hơn về
+hiệu suất của mô hình trong từng khía cạnh cụ thể*
+
+### PREDICTING DIABETES using Decision Tree model
+
+#### Ma trận tương quan
 
 ```{r}
+#install.packages("corrgram")
 library(corrgram)
 ```
 
 ```{r}
-corrgram(df)
+corrgram(diabetes_filter)
 ```
 
-Xét biểu đồ tương quan, ta thấy:<br>
-- Pregnancies và Age tương quan cao<br>
-- SkinThickness và Insulin tương quan cao<br>
+Xét biểu đồ tương quan, ta thấy:<br> - Pregnancies và Age tương quan
+cao<br> - SkinThickness và Insulin tương quan cao<br>
 
-Do đó: Khi xây dựng mô hình dự đoán, với mỗi cặp thuộc tính, chỉ sử dụng 1 trong 2 để hạn chế tình trạng đa cộng tuyến (multicollinearity)
+Do đó: Khi xây dựng mô hình dự đoán, với mỗi cặp thuộc tính, chỉ sử dụng
+1 trong 2 để hạn chế tình trạng đa cộng tuyến (multicollinearity)
 
+#### **Xây dựng mô hình**
 
+## **Xây dựng các mô hình**
 
-## Xây dựng các mô hình
-
-### Chia tập dữ liệu thành 2 tập train và test
+### MÔ HÌNH CÂY QUYẾT ĐỊNH
+#### Chia tập dữ liệu thành 2 tập train và test
 
 ```{r}
 library(caret)
 ```
 
+Chi tập dữ liệu thành 2 phần, tập train để xây dựng mô hình và tập test để kiểm tra mô hình
 ```{r}
 set.seed(1)
-split <- createDataPartition(df$Outcome,p = 0.75,list = FALSE)
-dfTrain <- df[split,]
-dfTest <- df[-split,]
+split <- createDataPartition(diabetes_filter$Outcome,p = 0.75,list = FALSE)
+dfTrain <- diabetes_filter[split,]
+dfTest <- diabetes_filter[-split,]
 ```
 
 ```{r}
@@ -304,7 +335,9 @@ head(dfTest)
 ```
 
 #### Hàm kiểm tra mô hình
+Xây dựng các hàm kiểm tra kết quả của mô hình
 
+Hàm xây dựng ma trận nhầm lẫn để xem kết quả dự đoán và tính độ chính xác bằng ma trận nhầm lẫn
 ```{r}
 # Dùng ma trận nhầm lẫn
 accuracy <- function() {
@@ -321,40 +354,33 @@ accuracy <- function() {
 ```
 
 
-### Xây dựng mô hình cây quyết định 
-
-#### Tính entropy cho các thuộc tính
-
+Hàm tính độ chính xác, độ nhạy và độ đặc hiệu của mô hình
 ```{r}
-# Tính entropy cho từng cột trong dfTrain
-# Hàm tính entropy
-calculate_entropy <- function(attribute_vector) {
-  total_count <- length(attribute_vector)
-  values <- table(attribute_vector)
-  probabilities <- values / total_count
-  entropy <- -sum(probabilities * log2(probabilities))
-  return(entropy)
+thongso <- function() {
+  predictions <- predict(model, newdata = dfTest, type = "class")
+  confusion_matrix <- table(predictions, dfTest$Outcome)
+  TP <- confusion_matrix[2, 2]  # True Positive
+  TN <- confusion_matrix[1, 1]  # True Negative
+  FP <- confusion_matrix[1, 2]  # False Positive
+  FN <- confusion_matrix[2, 1]  # False Negative
+  
+  Accuracy<-(TP+TN)/(TP+TN+FP+FN)
+  cat("Độ chính xác:",Accuracy,"\n")
+  
+  #trong số bệnh nhân thực tế bị bệnh tiểu đường,bao nhiêu phần trăm được dự báo bị bệnh
+  Sensitivity<-TP/(TP+FN)
+  cat("Độ nhạy:",Sensitivity,"\n")
+  #trong số bệnh nhân thực tế không bị bệnh, bao nhiêu phần trăm được dự báo không bị bệnh
+  
+  Specificity<-TN/(TN+FP)
+  cat("Độ đặc hiệu",Specificity)
 }
-
-calculate_entropy_for_columns <- function(data) {
-  entropy_values <- numeric()
-  for (col in names(data)) {
-    entropy <- calculate_entropy(data[[col]])
-    entropy_values <- c(entropy_values, entropy)
-  }
-  names(entropy_values) <- names(data)
-  return(entropy_values)
-}
-
-# Tính entropy cho các cột trong dfTrain
-entropy_values <- calculate_entropy_for_columns(dfTrain)
-entropy_values
-
 ```
 
 
-#### Xây dựng mô hình cây quyết định
-
+#### Xây dựng mô hình cây quyết định 
+##### Mô hình cây quyết định
+Xây dựng mô hình cây quyết định ban đầu. Với thuộc tính mục tiêu là Outcome, và biến thành phần và các thuộc tính còn lại của tập dữ liệu
 ```{r}
 # Huấn luyện mô hình cây quyết định
 library(rpart)
@@ -367,16 +393,21 @@ print(model)
 library(rpart.plot)
 rpart.plot(model)
 ```
+<br>Xem kết quả dự đoán từ mô hình cây quyết định
+```{r}
+thongso()
+```
+
 
 ##### Xem độ quan trọng của các thuộc tính trong mô hình
-
+Quan sát biểu đồ mức độ quan trọng của các thuộc tính trong mô hình để thay đổi thuộc tính thành phần
 ```{r}
 library(vip)
 var_importance <- vip::vip(model, num_features = 10)
 print(var_importance)
 ```
 
-
+Quan sát tác động của của các thuộc tính riêng lẻ lên quyết định của mô hình
 ```{r}
 library(pdp)
 library(ggplot2)
@@ -392,57 +423,52 @@ for (col in names(dfTrain)[-ncol(dfTrain)]) {
 
 ```
 
-Dựa vào biểu đồ mức độ quan trọng của các thuộc tính trong mô hình ta thấy rằng: <br>
+<br>Dựa vào biểu đồ mức độ quan trọng của các thuộc tính trong mô hình ta thấy rằng: <br>
   - Các thuộc tính Pregnancies, BloodPressure, SkinThickness, Insulin có trọng số thấp nhất. <br>
 Dựa vào Partial Dependence Plot (PDP) - Biểu đồ phụ thuộc một phần thấy rằng:<br>
   - Các thuộc tính Pregnancies, BloodPressure, SkinThickness, Insulin tăng lên nhưng không ảnh hưởng đến kết quả dự đoán của mô hình.<br>
   
-#### Loại bỏ các thuộc tính trên (Pregnancies, SkinThickness, Insulin)
-##### Loại bỏ Insulin
-
-```{r}
-model <- rpart(Outcome ~ Pregnancies + Glucose + BloodPressure + SkinThickness + BMI + DiabetesPedigreeFunction + Age, data = dfTrain, method = "class")
-accuracy()
-```
-
-##### Loại bỏ Insulin và SkinThickness và Pregnancies
+##### Loại bỏ các thuộc tính trên (Pregnancies, SkinThickness, Insulin)
+Loại bỏ thuộc tính Insulin, SkinThickness và Pregnancies thấy mô hình tăng độ chính xác, độ nhạy và độ đặc hiệu. Quyết định chấp nhận mô hình với độ chính xác ~76% và độ nhạy ~0.64, độ đặc hiệu ~0.82
 
 ```{r}
 model <- rpart(Outcome ~ Glucose + BloodPressure + BMI + DiabetesPedigreeFunction + Age, data = dfTrain, method = "class")
 rpart.plot(model)
-accuracy()
 ```
-
-#### Trích xuất các luật từ cây quyết định
-
+<br>Thông số của mô hình sau khi loại bỏ các thuộc tính có độ quan trọng thấp
+```{r}
+accuracy()
+thongso()
+```
+##### Trích xuất các luật từ cây quyết định
+Xem quy luật của mô hình cây quyết định
 ```{r}
 rules <- rpart.rules(model)
 print(rules)
 ```
 
-### Classifying the categories of Mass (BMI)
+### Classifying the categories of Mass (BMI) using Random Forest model
 
-The World Health Organization (WHO) classifies adults based on the following BMI ranges:
+The World Health Organization (WHO) classifies adults based on the
+following BMI ranges:
 
-* Underweight: < 18.5 kg/m^2
+-   Underweight: \< 18.5 kg/m\^2
 
-* Normal weight: 18.5 - 24.9 kg/m^2
+-   Normal weight: 18.5 - 24.9 kg/m\^2
 
-* Overweight: 25.0 - 29.9 kg/m^2
+-   Overweight: 25.0 - 29.9 kg/m\^2
 
-* Obese: ≥ 30.0 kg/m^2
+-   Obese: ≥ 30.0 kg/m\^2
 
 ```{r}
 library(ggplot2)
 ```
-
 
 ```{r}
 diabetes_filter$BMI_Category <- cut(diabetes_filter$BMI, 
                              breaks = c(-Inf, 18.5, 24.9, 29.9, Inf), 
                              labels = c("Underweight", "Normal", "Overweight", "Obese"))
 ```
-
 
 *Trực quan phân bố của từng loại cân nặng*
 
@@ -454,7 +480,7 @@ ggplot(diabetes_filter, aes(x = BMI_Category)) +
 
 ```
 
-Tạo một dataframe bản sao với BMI_Category đã được số hóa
+*Tạo một dataframe bản sao với BMI_Category đã được số hóa*
 
 ```{r}
 num_diabetes <- diabetes_filter
@@ -466,8 +492,7 @@ num_diabetes$BMI_Category <- cut(diabetes_filter$BMI,
 num_diabetes$BMI_Category <- as.integer(num_diabetes$BMI_Category)
 ```
 
-
-Tìm các biến độc lập so với biến phụ thuộc BMI_Category
+*Tìm các biến độc lập so với biến phụ thuộc BMI_Category*
 
 ```{r}
 library(lattice)
@@ -475,31 +500,33 @@ library(reshape2)
 
 # creating correlation matrix
 corr_mat <- round(cor(num_diabetes),2)
- 
+
 # reduce the size of correlation matrix
 melted_corr_mat <- melt(corr_mat)
 # head(melted_corr_mat)
- 
+
 # plotting the correlation heatmap
 library(ggplot2)
 ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, fill=value)) + geom_tile() +
   geom_text(aes(Var2, Var1, label = value), color = "white", size = 4)
 ```
+
 Ta có thể thấy:
 
-* So với BMI_Category, các thuộc tính BMI, Insulin, SkinThickness, BloodPressure và Glucose đều tương quan mạnh (5 thuộc tính)
+-   So với BMI_Category, các thuộc tính BMI, Insulin, SkinThickness,
+    BloodPressure và Glucose đều tương quan mạnh (5 thuộc tính)
 
-* Vậy thuộc tính BMI_Category sẽ phụ thuộc nhiều vào chúng, ta có thể xem chúng là các biến độc lập
-
+-   Vậy thuộc tính BMI_Category sẽ phụ thuộc nhiều vào chúng, ta có thể
+    xem chúng là các biến độc lập
 
 ## **Xây mô hình Random Forest để phân loại cân nặng**
 
 ### Chia dữ liệu thành huấn luyện và kiểm tra. 80% dành cho đào tạo, 20% dành cho kiểm tra.
 
 ```{r}
-set.seed(12)
+set.seed(456)
 
-samp <- sample(nrow(diabetes_filter), 0.5 * nrow(diabetes_filter))
+samp <- sample(nrow(diabetes_filter), 0.7 * nrow(diabetes_filter))
 
 train <- diabetes_filter[samp, ]
 
@@ -508,21 +535,20 @@ test <- diabetes_filter[-samp, ]
 
 ```{r}
 #Kiểm tra kích thước của tập dữ liệu huấn luyện và kiểm tra
-dim(train)
+str(train)
 ```
 
-### Cách 1: Dùng kiểm định thông thường cho RF
-
 ```{r}
+install.packages("randomForest")
 library(randomForest) 
 ```
 
-#### Tìm giá trị tốt nhất cho tham số mtry bằng tuneRF
+### Tìm giá trị tốt nhất cho tham số mtry bằng tuneRF
 
 ```{r}
 rf_fit <- tuneRF(
-  x = train[,-9],
-  y = train$BMI_Category,
+  x = train[, 1:8],
+  y = train[, 10],
   metric = "OOBAcc",
   ntreeTry = 100,
   mtryStart = 3,
@@ -533,37 +559,32 @@ rf_fit <- tuneRF(
 )
 ```
 
+### Tìm số cây trong rừng để mô hình cho kết quả tốt nhất với mtry = 3
 
 ```{r}
 # Lặp lại quá trình huấn luyện và đánh giá trên các giá trị khác nhau của ntree
 error_out_of_bag <- c()
-error_test <- c()
+
 for (ntree in 1:100) {
     # Huấn luyện mô hình
-    model <- randomForest(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome -Pregnancies, data = train, ntree = ntree, mtry=3)
+    model <- randomForest(BMI_Category ~ . -Age -Pregnancies, data = train, ntree = ntree, mtry=3)
 
     # Tính lỗi ra ngoài túi
     error_out_of_bag[ntree] <- mean(predict(model, train) != train$BMI_Category)
-
-    # Tính lỗi kiểm tra
-    error_test[ntree] <- mean(predict(model, test) != test$BMI_Category)
 }
 
 # Vẽ đường cong lỗi
-plot(error_out_of_bag, type = "l", col = "blue", ylab = "OOB error", xlab="Số cây trong rừng")
-lines(error_test, type = "l", col = "red")
+plot(error_out_of_bag, type = "l", col = "red", ylab = "OOB error", xlab="Số cây trong rừng")
 ```
 
-
-#### Huấn luyện mô hình
+### Huấn luyện mô hình
 
 ```{r}
-model <- randomForest(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome -Pregnancies, data = train, ntree = 100, mtry=3)
-
+model <- randomForest(BMI_Category ~ . -Age -Pregnancies, data = train, ntree = 100, mtry=3)
 model
 ```
 
-#### Xác thực mô hình của chúng tôi bằng cách sử dụng dữ liệu thử nghiệm
+### Xác thực mô hình của chúng tôi bằng cách sử dụng dữ liệu thử nghiệm
 
 ```{r}
 prediction <- predict(model, newdata = test)
@@ -571,13 +592,15 @@ prediction <- predict(model, newdata = test)
 table(prediction, test$BMI_Category)
 ```
 
-#### Hiển thị giá trị dự đoán so với giá trị thực tế
+### Hiển thị giá trị dự đoán so với giá trị thực tế
 
 ```{r}
 results<-cbind(prediction,test$BMI_Category)
 
-results
+head(results)
+```
 
+```{r}
 colnames(results)<-c('pred','real')
 
 results<-as.data.frame(results)
@@ -585,120 +608,147 @@ results<-as.data.frame(results)
 View(results)
 ```
 
-#### Tính độ chính xác của mô hình
+### Tính độ chính xác của mô hình
 
 ```{r}
 accuracy <- mean(prediction == test$BMI_Category)
 accuracy
 ```
 
-Bạn có thể thấy rằng độ chính xác của mô hình này là khoảng 98 phần trăm, điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
-
-
-### Cách 2: dùng cross-validation bằng thư viện caret
-
-```{r}
-library(caret)
-```
-
-#### Huấn luyện mô hình
-
-```{r}
-model_cv <- train(BMI_Category ~ . -DiabetesPedigreeFunction -Age -Outcome, data = train, method = "rf", metric = "Accuracy", trControl = trainControl(method = "cv", number = 20, search = "grid"))
-
-```
-
-#### Xác thực mô hình trên tập kiểm tra
-
-```{r}
-pred <- predict(model_cv, newdata=test)
-
-table(pred, test$BMI_Category)
-```
-
-#### Tính độ chính xác của mô hình
-
-```{r}
-accuracy <- mean(pred == test$BMI_Category)
-accuracy
-```
-
+Bạn có thể thấy rằng độ chính xác của mô hình này là khoảng 99-100 (%), điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
 
 
 ## **kiểm định giả thuyết thống kế**
-### ****
 
 ### để chứng minh phần trăm mỡ trong cơ thẻ cũng ảnh hướng đến việc có mắc bệnh hay không
 
 ### *Cách 1: One-Sample T-test*
-###giả thuyết BMI (Chỉ số khối cơ thể) trung bình 31 dễ mắc bệnh tiểu đường
+
+### giả thuyết BMI (Chỉ số khối cơ thể) trung bình 31 dễ mắc bệnh tiểu đường
+
+```{r}
+library(knitr)
+```
 
 ```{r}
 # Vẽ biểu đồ histogram
-ggplot(diabetes, aes(x = BMI)) +
+ggplot(diabetes_filter, aes(x = BMI)) +
   geom_histogram(binwidth = 2, fill = "lightblue", color = "black") + 
   labs(x = "BMI", title = "Histogram of BMI") + theme_minimal() 
 
 # summary statistics
-kable(summary(select(diabetes, BMI)), format = "markdown")
+kable(summary(select(diabetes_filter, BMI)), format = "markdown")
 ```
-
 
 ###giả thuyết BMI trung bình mắc bệnh tiểu đường là 31
 
 $$ 
 H_0: bmi = 31
-$$
+$$ 
+
 $$ 
 H_a: bmi \neq 31
 $$
+$$
+t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}} \\
+\bar{x} \text{: là giá trị trung bình của mẫu.} \\
+
+\mu_0 \text{: là giá trị trung bình đã biết đến hoặc giả định.}\\
+
+s \text{: là độ lệch chuẩn của mẫu.}\\
+
+n \text{: là kích thước mẫu.}
+$$
+
 ```{r}
-t.test(diabetes$BMI, mu=31)
+# Tính độ lệch chuẩn của mẫu dữ liệu
+standard_deviation <- sd(diabetes_filter$BMI)
+print(standard_deviation)
+
+t.test(diabetes_filter$BMI, mu=31)
 ```
 
-### Kết luận và giải thích
-- Từ đầu ra và từ p.value chúng ta thấy rằng
-- p-value nhỏ mức ý nghĩa 5%. 
-- Giống như bất kỳ bài kiểm tra thống kê nào khác , nếu p-value nhỏ hơn mức ý nghĩa thì có thể bác bỏ giả thuyết.
---> Dựa vào kết quả kiểm định t-test, có thể kết luận rằng giá trị trung bình thực sự của cột "BMI" không bằng 31, và Ước lượng trung bình của mẫu có thể nằm trong khoảng từ 31.43410 đến 32.55106 với mức tin cậy 95%.
+#### Kết luận và giải thích
+
+-   Từ đầu ra và từ p.value chúng ta thấy rằng
+-   p-value nhỏ mức ý nghĩa 5%.
+-   Giống như bất kỳ bài kiểm tra thống kê nào khác , nếu p-value nhỏ
+    hơn mức ý nghĩa thì có thể bác bỏ giả thuyết. --\> Dựa vào kết quả
+    kiểm định t-test, có thể kết luận rằng giá trị trung bình thực sự
+    của cột "BMI" không bằng 31, và Ước lượng trung bình của mẫu có thể
+    nằm trong khoảng từ 31.43410 đến 32.55106 với mức tin cậy 95%.
 
 # -------------------------------------------
+
 ## **Cách 2: Independent Samples T-test**
-### để chứng minh phần trăm mỡ trong cơ thẻ cũng ảnh hướng đến việc có mắc bệnh hay không
-### giả thuyết lượng mỡ trong cơ thể (BMI) không ảnh hưởng đến việc có bệnh hay không
+
+#### **để chứng minh phần trăm mỡ trong cơ thẻ cũng ảnh hướng đến việc có mắc bệnh hay không**
+
+### giả thuyết lượng mỡ trong cơ thể (BMI) không ảnh hưởng đến việc có bệnh hay không\*\*
 
 ```{r}
 # Vẽ biểu đồ histogram
-ggplot(diabetes, aes(x = BMI_Category)) + 
+ggplot(diabetes_filter, aes(x = BMI_Category)) + 
   geom_bar(stat = "count") + 
   labs(title = "Distribution of BMI Categories", x = "BMI Category", y = "Count") + 
   theme_bw()
 ```
 
-
-###giả thuyết tỳ lệ BMI của người bệnh và không bệnh là như nhau
+###giả thuyết tỳ lệ BMI của người bệnh và không bệnh là như nhau 
 $$ 
 H_0: bmi_0 = bmi_1
-$$
+$$ 
+
 $$ 
 H_a: bmi_0 \neq bmi_1
 $$
+
+
+
+$$
+t = \frac{\bar{x}_A - \bar{x}_B}{\sqrt{\frac{s_A^2}{n_A} + \frac{s_B^2}{n_B}}} \\
+(\bar{x}_A) \text{: là giá trị trung bình của nhóm A.} \\
+(\bar{x}_B) \text{: là giá trị trung bình của nhóm B.} \\
+
+(s_A) \text{: là độ lệch chuẩn của nhóm A.} \\
+(s_B) \text{: là độ lệch chuẩn của nhóm B.} \\
+
+(n_A) \text{: là kích thước của nhóm A.} \\
+(n_B) \text{: là kích thước của nhóm B.}\\
+
+$$
+
+
+
 ```{r}
 #lấy ra những người bệnh và không bệnh có chỉ số BMI_Category >= 3
 sick <- num_diabetes[num_diabetes$Outcome==1 & num_diabetes$BMI_Category >= 3,10]
 normal <- num_diabetes[num_diabetes$Outcome==0 & num_diabetes$BMI_Category >= 3,10]
+length(sick)
+length(normal)
+# Tính độ lệch chuẩn của mỗi mẫu dữ liệu
+sa <- sd(sick)
+print(sa)
 
+sb <- sd(normal)
+print(sb)
+```
+
+```{r}
 t.test(normal,sick,var.equal=FALSE)
 ```
 
-### Kết luận và giải thích
-- Từ đầu ra và từ p.value chúng ta thấy rằng
-- p-value nhỏ mức ý nghĩa 5%. 
-- Giống như bất kỳ bài kiểm tra thống kê nào khác , nếu p-value nhỏ hơn mức ý nghĩa thì có thể bác bỏ giả thuyết.
---> Dựa vào kết quả kiểm định t-test, có thể kết luận rằng lượng mỡ trong cơ thể có ảnh hưởng đến việc người đó có bệnh tiểu đường .
+#### Kết luận và giải thích
 
+-   Từ đầu ra và từ p.value chúng ta thấy rằng
+-   p-value nhỏ hơn mức ý nghĩa 5%.
+-   Giống như bất kỳ bài kiểm tra thống kê nào khác , nếu p-value nhỏ
+    hơn mức ý nghĩa thì có thể bác bỏ giả thuyết. --\> Dựa vào kết quả
+    kiểm định t-test, có thể kết luận rằng lượng mỡ trong cơ thể có ảnh
+    hưởng đến việc người đó có bệnh tiểu đường .
 
 ## *để chứng minh độ tuổi cũng ảnh hưởng đến việc người đó có bị bệnh tiểu đường hay không.*
+
 ### giả thuyết độ tuổi trung bình mắc bệnh tiểu đường là 32
 
 ```{r}
@@ -711,7 +761,6 @@ ggplot(diabetes, aes(x = Age)) +
 # summary statistics
 kable(summary(select(diabetes, Age)), format = "markdown")
 ```
-
 
 ###giả thuyết độ tuổi trung bình mắc bệnh tiểu đường là 32
 
@@ -727,10 +776,12 @@ $$
 t.test(diabetes$Age, mu=32)
 ```
 
-### Kết luận và giải thích
-- Từ đầu ra và từ p.value chúng ta thấy rằng
-- p-value nhỏ mức ý nghĩa 5%. 
-- Giống như bất kỳ bài kiểm tra thống kê nào khác , nếu p-value nhỏ hơn mức ý nghĩa thì có thể bác bỏ giả thuyết không.
---> Dựa vào kết quả kiểm định t-test, có thể kết luận rằng giá trị trung bình thực sự của cột "Age" không bằng 32, và Ước lượng trung bình của mẫu có thể nằm trong khoảng từ 32.41 đến 34.07 với mức tin cậy 95%.
+#### Kết luận và giải thích
 
-
+-   Từ đầu ra và từ p.value chúng ta thấy rằng
+-   p-value nhỏ mức ý nghĩa 5%.
+-   Giống như bất kỳ bài kiểm tra thống kê nào khác , nếu p-value nhỏ
+    hơn mức ý nghĩa thì có thể bác bỏ giả thuyết không. --\> Dựa vào kết
+    quả kiểm định t-test, có thể kết luận rằng giá trị trung bình thực
+    sự của cột "Age" không bằng 32, và Ước lượng trung bình của mẫu có
+    thể nằm trong khoảng từ 32.41 đến 34.07 với mức tin cậy 95%.

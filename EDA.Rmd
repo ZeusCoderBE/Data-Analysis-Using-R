@@ -1,7 +1,14 @@
----
-title: "R Notebook"
-output: html_notebook
----
+<link rel="stylesheet" type="text/css" href="styles.css">
+<br>
+<img src="https://fit.hcmute.edu.vn/Resources/Images/SubDomain/fit/HCMUTE-fit.png" alt="ảnh đồ án" class="custom-image-class">
+<br>
+<br>
+<div>
+<h1 style="color:red; text-align: center;">**NHÓM 7 DỮ LIỆU VỀ TIỂU ĐƯỜNG **</h1>
+<h1 style="color:black; text-align: center;">**Thăm dò tập dữ liệu Pima Indian Diabetes **</h1>
+<h4 style="text-align: center;">*date: 2023-12-13*</h4>
+</div>
+<br>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -24,7 +31,7 @@ library(reader)
 # Đọc file CSV trực tiếp từ đường link
 diabetes <- read.csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
 # Hiển thị dữ liệu
-diabetes
+head(diabetes)
 ```
 
 ### Overall of dataset: dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
@@ -66,6 +73,8 @@ summary(diabetes)
 ##### Distribution of Age, Pregnancies, Glucose and Outcome
 
 ```{r}
+#install.packages("cowplot")
+#install.packages("gridExtra")
 library(ggplot2)
 library(cowplot)
 library(gridExtra)
@@ -149,7 +158,7 @@ p3 <- ggplot(data = diabetes, aes(x = Pregnancies, y = Outcome)) +
 
 grid.arrange(p1, p2, p3, ncol = 3)
 ```
-Ta có thể thấy
+<br> Ta có thể thấy
 
 * Theo đường hồi quy dương trên, số lần mang thai hoặc nồng độ glucose càng tăng thì tỉ lệ mắc bệnh tiểu đường càng cao
 
@@ -171,7 +180,7 @@ for (col in colnames(diabetes)) {
 
 #### Kiểm tra giá trị ngoại lai
 
-Tìm giá trị ngoại lai
+##### Tìm giá trị ngoại lai
 
 ```{r}
 find_outliers <- function(inp, na.rm = TRUE) {
@@ -185,7 +194,7 @@ find_outliers <- function(inp, na.rm = TRUE) {
 
 ```
 
-Lập tỉ lệ outliers trong cột tương ứng
+##### Lập tỉ lệ outliers trong cột tương ứng
 
 ```{r}
 calculate_rate <- function(inp) {
@@ -209,7 +218,7 @@ for (col in colnames(diabetes)) {
 }
 ```
 
-Vẽ trực quan tỉ lệ ngoại lai
+##### Vẽ trực quan tỉ lệ ngoại lai
 
 ```{r}
 pie_outlier <- function(outlier_col) {for (col in outlier_col) {
