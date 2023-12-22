@@ -62,11 +62,25 @@ Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiề
 str(diabetes)
 ```
 
+
+Ta có thể thấy:
+
+- Chỉ có 2 thuộc tính BMI và DiabetesPedigreeFunction là kiểu số thực, còn lại là int
+
+- Tổng có 768 dòng và 9 cột
+
 #### Summary of statistic
 
 ```{r}
 summary(diabetes)
 ```
+
+
+Ta có thể thấy:
+
+- Cột SkinThickness, Insulin có 1% điểm dữ liệu bằng 0 (vì Min=0)
+
+- Cột Outcome có 75% điểm dữ liệu < 1, chứng tỏ tỉ lệ mắc bệnh tiểu đường thấp
 
 #### Data visualization of distribution attributes
 
@@ -138,6 +152,20 @@ Ta có thể thấy:
 
 #### The correlation between attributes and Outcome
 
+*Cách tính đường hồi quy tuyến tính:*
+
+- Tính tổng các bình phương khoảng cách d tới đường hồi quy sao cho là bé nhất với mọi điểm dữ liệu. Ta sẽ được đường hồi quy phù hợp nhất
+
+$$
+sum_{min} = d_1^2+d_2^2+d_3^2+... \\
+$$
+
+- Công thức tính khoảng cách từ 1 điểm đến 1 đường thẳng
+
+$$
+d(M, \Delta) = \sqrt{\dfrac{|ax_0+by_0+c|}{a^2+b^2}} \\
+$$
+
 ```{r}
 p1 <- ggplot(data = diabetes, aes(x = Glucose, y = Outcome)) +
   geom_point() +
@@ -164,7 +192,7 @@ grid.arrange(p1, p2, p3, ncol = 3)
 ```
 <br> Ta có thể thấy
 
-* Theo đường hồi quy dương trên, số lần mang thai hoặc nồng độ glucose càng tăng thì tỉ lệ mắc bệnh tiểu đường càng cao
+* Theo đường hồi quy tuyến tính dương trên, số lần mang thai hoặc nồng độ glucose càng tăng thì tỉ lệ mắc bệnh tiểu đường càng cao
 
 * Ngược lại, độ dày của da không ảnh hưởng quá mạnh vào khả năng mắc bệnh tiểu đường
 

@@ -14,13 +14,13 @@
 
 <h4 style="text-align: center;">
 
-*date: 2023-12-13*
-
 </h4>
 
 </div>
 
 <br>
+
+## II.Tiền xử lí dữ liệu
 
 <h3>**Chuẩn bị các thư viện**</h3>
 
@@ -39,7 +39,8 @@ library(tidyr)
 library(ggplot2)
 ```
 
-## **STEP-1 : Importing Diabetes Data from Google Drive**
+
+### Nhập Dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường từ Google Drive
 
 ```{r}
 
@@ -51,7 +52,7 @@ head(diabetes)
 
 ## **Overall of dataset:** Dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
 
-*Bộ dữ liệu này chứa thông tin về 769 phụ nữ và bao gồm nhiều thuộc tính
+*Bộ dữ liệu này chứa thông tin về 768 phụ nữ và bao gồm nhiều thuộc tính
 liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về các cột:*
 
 -   **Mang thai:** Số lần người phụ nữ đã mang thai.
@@ -76,34 +77,37 @@ liên quan đến sức khỏe. Dưới đây là tổng quan ngắn gọn về 
     đường hay không (1 đối với bệnh nhân tiểu đường, 0 đối với người
     không mắc bệnh tiểu đường).
 
-### Check for Null Values
+### Xử lí giá trị bị thiếu
 
-*The following code checks for null values in each column.*
+####  Kiểm tra các giá trị bị thiếu 
+
+- *Kiểm tra các giá trị bị thiếu của từng cột*
 
 ```{r}
 na_count<-colSums(sapply(diabetes,is.na))
 na_count
 ```
+*Bộ dữ liệu này không tồn tại giá trị bị thiếu*
 
-### Handling Null Values
+#### Các phương pháp xử lí giá trị bị thiếu
 
-*There are several ways to handle null values in a dataset.*
+*Giới thiệu 3 phương pháp xử lí giá trị bị thiếu :*
 
-*Fill in the missing values with the median value of each column.*
+- *Điền giá trị trung vị.*
 
 ```{r}
 diabetes_median <- diabetes %>%
 mutate_all(~ ifelse(is.na(.), median(., na.rm = TRUE), .))
 ```
 
-*fill in the missing values with the mean value of each column*
+- *Điền giá trị trung bình.*
 
 ```{r}
 diabetes_mean <- diabetes %>%
 mutate_all(~ ifelse(is.na(.), mean(., na.rm = TRUE), .))
 ```
 
-*fill in the missing values with the common value of each column*
+- *Điền giá trị phổ biến nhất.*
 
 ```{r}
 
@@ -119,33 +123,40 @@ mutate_all(fill_mode)
 
 ```
 
-### Handling Outliers
+### Xử lí giá trị ngoại lai
+#### Phương pháp xử lý giá trị ngoại lai dựa trên ma trận Z-score
 
-*Z-score (z-score standardization) is a method for handling outliers. It
-is calculated using the following formula:*
+- *Bước 1:Tìm Z-score cho tất cả các điểm trong tập dữ liệu*
+
+- *Bước 2: Vẽ biểu đồ Scatter Plots biểu diễn ma trận Z-score*
+
+- *Bước 3: Quan sát biểu đồ Z-score,tìm Z-score ngưỡng*
+
+- *Bước 4: Dựa trên Z-score ngưỡng và loại các giá trị vượt qua Z-score ngưỡng đó*
+
+#### *Ta có công thức như sau :*
 
 $$
 Z = \frac{{X - \bar{X}}}{{\sigma}}
 $$
 
-*where:*
+*Trong đó:*
 
--   $X$ is the specific value.
+-   $X$ là giá trị của một điểm dữ liệu cụ thể trong một thuộc tính nào đó.
 
--   $\bar{X}$ is the mean of the variable.
+-   $\bar{X}$ là giá trị trung bình của thuộc tính đó trong tập dữ liệu.
 
--   $\sigma$ is the standard deviation of the variable.
+-   $\sigma$ là độ lệch chuẩn của thuộc tính đó trong tập dữ liệu.
 
-*This method helps standardize the data and identify values that deviate
-significantly from the mean.*
-
+ *Áp dụng công thức trên để biến đổi bộ dữ liệu thành ma trận Z-score*
 ```{r}
 diabetes_z <- (diabetes - colMeans(diabetes)) / apply(diabetes, 2, sd)
 head(diabetes_z)
 
 ```
 
-#### Drawing scatter plot from the graph
+#### Vẽ biểu đồ Scatter Plots biểu diễn ma trận Z-score
+- *Biểu đồ này cho phép chúng ta quan sát được các giá trị ngoại lai*
 
 ```{r}
 
@@ -158,7 +169,9 @@ ggplot(melted_diabetes, aes(x = Variable, y = `Z-score`, color = `Z-score`)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Điều chỉnh góc và vị trí của chú thích trên trục x
 ```
 
-#### Drawing scatter plot from the graph, we observe that values \>= 700 are outliers
+#### Quan sát biểu đồ ta thấy được các điểm Z-score >=700 là các giá trị ngoại lai 
+
+-*Ta chọn Z-score ngưỡng là 700 và loại các giá trị Z-score mà vượt qua ngưỡng đó * 
 
 ```{r}
 # Lọc các giá trị Z-score mà tất cả đều nhỏ hơn 700
@@ -168,9 +181,10 @@ diabetes_filter <- diabetes[rowSums(apply(diabetes_z, 2, function(x) abs(x) < 70
 cat("Còn lại số lượng hàng và cột là:", dim(diabetes_filter))
 ```
 
-### Correlation between Numeric Variables and Outcomes
+### Loại bỏ các cột không cần thiết (nếu có) cho việc xây dựng mô hình
 
-*Drawing boxplot*
+
+#### Vẽ biểu đồ hộp để xem sự phân phối dữ liệu của biến mục tiêu và biến độc lập
 
 ```{r}
 attach(diabetes_filter)
@@ -194,19 +208,25 @@ box(which = "outer", lty = "solid")
 
 diabetes_f<-diabetes_filter
 ```
-*Huyết áp và độ dày của da ít thay đổi với bệnh tiểu đường, chúng sẽ bị loại khỏi mô hình. Các biến khác ít nhiều cho thấy mối tương quan với bệnh tiểu đường nên sẽ được giữ nguyên*
+#### Huyết áp và độ dày của da ít thay đổi với bệnh tiểu đường, chúng sẽ bị loại khỏi mô hình. Các biến khác ít nhiều cho thấy mối tương quan với bệnh tiểu đường nên sẽ được giữ nguyên 
 
 ```{r}
 diabetes_f $BloodPressure <- NULL
 diabetes_f $SkinThickness <- NULL
+
+dim(diabetes_f)
 ```
 
-*Chuẩn hoá dữ liệu về một thang đo chung*
+### Chuẩn hoá dữ liệu 
+
+#### Phương pháp chuẩn hoá dữ liệu bằng MinMax-Scaler 
 
 -   *Đảm bảo rằng các biến có thang đo đồng nhất.Miền giá trị nằm trong
     khoảng (0-1), giúp mô hình học tốt hơn.*
 
 -   *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
+
+#### Công thức :
 
 $$ \text{Scaled Value} = \frac{{X - \text{min}(X)}}{{\text{max}(X) - \text{min}(X)}} $$
 
@@ -219,9 +239,11 @@ diabetes_scale <- as.data.frame(lapply(diabetes_f, min_max_scaler))
 head(diabetes_scale)
 
 ```
-
+## III.Xây dựng các mô hình 
 
 ### PREDICTING DIABETES using Logarithmic Regression model
+
+#### Chia tập dữ liệu thành 2 phần , 70% tập dữ liệu để train, 30 tập dữ liệu để test
 
 ```{r}
 train <- diabetes_scale [1:530,]
@@ -230,27 +252,27 @@ model <-glm(Outcome ~.,family=binomial(link='logit'),data=train)
 summary(model)
 ```
 
-*"Ba thuộc tính phù hợp nhất, 'Glucose', 'BMI' và 'Mang thai' có giá trị
-p thấp, cho thấy mức ý nghĩa cao. Điều này cho thấy rằng các biến độc
-lập này ảnh hưởng đáng kể đến hiệu suất của mô hình hồi quy logistic
-trong dự đoán 'Kết quả.'*
+#### Với mức ý nghĩa là 0.05 ta thấy rằng ba thuộc tính phù hợp nhất, 'Glucose', 'BMI' và 'Pregnancies' có giá trị p thấp.Điều này cho thấy rằng các biến độc lập này ảnh hưởng đáng kể đến hiệu suất của mô hình hồi quy logistic trong dự đoán 'Kết quả.'
 
-*"Insulin" và "Tuổi" không có ý nghĩa thống kê vì giá trị p cao .*
+#### "Insulin" và "Age" không có ý nghĩa thống kê vì giá trị p cao .
 
 ```{r}
 anova(model, test="Chisq")
 ```
 
-*Bảng "Analysis of Deviance Table" cung cấp thông tin về sự biến động
-của deviance (độ lệch) khi thêm vào từng biến độc lập vào mô hình*
+#### Bảng "Analysis of Deviance Table" cung cấp thông tin về sự biến động của deviance (độ lệch) khi thêm vào từng biến độc lập vào mô hình
 
-*Từ bảng độ lệch, chúng ta có thể thấy rằng việc bổ sung insulin và tuổi
-tác ít ảnh hưởng đến độ lệch còn lại.*
+#### Chúng ta có thể thấy rằng việc bổ sung insulin và tuổi tác ít ảnh hưởng đến độ lệch
 
-###Cross Validation
+#### Với mức ý nghĩa 0,05 cho thấy rằng Pregnacies, Glucose, BMI là những yếu tố dự báo quan trọng của biến Kết quả.
 
-*Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh
-,0: không mắc bệnh* *Tính toán ma trận nhầm lẫn*
+
+
+
+### Cross Validation
+
+#### Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh,0: không mắc bệnh 
+#### Tìm ma trận nhầm lẫn
 
 ```{r}
 fitted.results <- predict(model,newdata=test,type='response')
@@ -259,7 +281,7 @@ fitted.results <- ifelse(fitted.results > 0.5,1,0)
 
 ```
 
-*Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*
+#### Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*
 
 ```{r}
 TP <- conf_matrix_logi[2, 2]  # True Positive
@@ -280,11 +302,7 @@ cat("Độ đặc hiệu",Specificity)
 
 ```
 
-*Dựa trên các con số này. Ta thể kết luận rằng mô hình có độ chính xác
-khá cao. Đối với việc dự đoán bệnh nhân bị bệnh tiểu đường, mô hình có
-độ nhạy là 73.77%, và đối với việc dự đoán bệnh nhân không bị bệnh tiểu
-đường, độ đặc hiệu là 80.47%. Điều này cung cấp cái nhìn chi tiết hơn về
-hiệu suất của mô hình trong từng khía cạnh cụ thể*
+#### Dựa trên các con số này. Ta thể kết luận rằng mô hình có độ chính xác khá cao. Đối với việc dự đoán bệnh nhân bị bệnh tiểu đường, mô hình có độ nhạy là 73.77%, và đối với việc dự đoán bệnh nhân không bị bệnh tiểu đường, độ đặc hiệu là 80.47%. Điều này cung cấp cái nhìn chi tiết hơn về hiệu suất của mô hình trong từng khía cạnh cụ thể
 
 ### PREDICTING DIABETES using Decision Tree model
 
@@ -305,9 +323,6 @@ cao<br> - SkinThickness và Insulin tương quan cao<br>
 Do đó: Khi xây dựng mô hình dự đoán, với mỗi cặp thuộc tính, chỉ sử dụng
 1 trong 2 để hạn chế tình trạng đa cộng tuyến (multicollinearity)
 
-#### **Xây dựng mô hình**
-
-## **Xây dựng các mô hình**
 
 ### MÔ HÌNH CÂY QUYẾT ĐỊNH
 #### Chia tập dữ liệu thành 2 tập train và test
@@ -515,7 +530,7 @@ Ta có thể thấy:
 
 ## **Xây mô hình Random Forest để phân loại cân nặng**
 
-### Chia dữ liệu thành huấn luyện và kiểm tra. 80% dành cho đào tạo, 20% dành cho kiểm tra.
+### Chia dữ liệu thành huấn luyện và kiểm tra. 70% dành cho huấn luyện, 30% dành cho kiểm tra.
 
 ```{r}
 set.seed(456)
@@ -562,7 +577,7 @@ for (ntree in 1:100) {
     # Huấn luyện mô hình
     model <- randomForest(BMI_Category ~ . -Age -Pregnancies, data = train, ntree = ntree, mtry=3)
 
-    # Tính lỗi ra ngoài túi
+    # Tính lỗi out_of_bag
     error_out_of_bag[ntree] <- mean(predict(model, train) != train$BMI_Category)
 }
 
@@ -576,6 +591,15 @@ plot(error_out_of_bag, type = "l", col = "red", ylab = "OOB error", xlab="Số c
 model <- randomForest(BMI_Category ~ . -Age -Pregnancies, data = train, ntree = 100, mtry=3)
 model
 ```
+
+Ta có thể thấy:
+
+* OOB error tỉ lệ số lần phân loại sai trên tập OOB ở các cây trong rừng, OOB error càng thấp thì độ chính xác càng cao
+
+* class error là tỉ lệ phân loại sai ở các nhãn trên tập train đã tách OOB
+
+* Các chỉ số trên có thể khác nhau ở mỗi lần train, vì tập OOB sẽ lấy ngẫu nhiên
+
 
 ### Xác thực mô hình của chúng tôi bằng cách sử dụng dữ liệu thử nghiệm
 
@@ -638,7 +662,7 @@ ggplot(diabetes_filter, aes(x = BMI)) +
 kable(summary(select(diabetes_filter, BMI)), format = "markdown")
 ```
 
-###giả thuyết BMI trung bình mắc bệnh tiểu đường là 31
+### Giả thuyết BMI trung bình mắc bệnh tiểu đường là 31
 
 $$ 
 H_0: bmi = 31
@@ -647,15 +671,13 @@ $$
 $$ 
 H_a: bmi \neq 31
 $$
+
 $$
 t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}} \\
 \bar{x} \text{: là giá trị trung bình của mẫu.} \\
-
-\mu_0 \text{: là giá trị trung bình đã biết đến hoặc giả định.}\\
-
-s \text{: là độ lệch chuẩn của mẫu.}\\
-
-n \text{: là kích thước mẫu.}
+\mu_0 \text{: là giá trị trung bình đã biết đến hoặc giả định.} \\
+s \text{: là độ lệch chuẩn của mẫu.} \\
+n \text{: là kích thước mẫu.} \\
 $$
 
 ```{r}
@@ -692,7 +714,7 @@ ggplot(diabetes_filter, aes(x = BMI_Category)) +
   theme_bw()
 ```
 
-###giả thuyết tỳ lệ BMI của người bệnh và không bệnh là như nhau 
+### Giả thuyết tỳ lệ BMI của người bệnh và không bệnh là như nhau 
 $$ 
 H_0: bmi_0 = bmi_1
 $$ 
@@ -707,13 +729,10 @@ $$
 t = \frac{\bar{x}_A - \bar{x}_B}{\sqrt{\frac{s_A^2}{n_A} + \frac{s_B^2}{n_B}}} \\
 (\bar{x}_A) \text{: là giá trị trung bình của nhóm A.} \\
 (\bar{x}_B) \text{: là giá trị trung bình của nhóm B.} \\
-
 (s_A) \text{: là độ lệch chuẩn của nhóm A.} \\
 (s_B) \text{: là độ lệch chuẩn của nhóm B.} \\
-
 (n_A) \text{: là kích thước của nhóm A.} \\
-(n_B) \text{: là kích thước của nhóm B.}\\
-
+(n_B) \text{: là kích thước của nhóm B.} \\
 $$
 
 
