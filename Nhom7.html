@@ -370,37 +370,37 @@ display: none;
 <pre class="r"><code>install.packages(&quot;readr&quot;)</code></pre>
 <pre><code>## The following package(s) will be installed:
 ## - readr [2.1.4]
-## These packages will be installed into &quot;E:/Nam_Hoc_2023-2024/R/Project_R/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
+## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
 ## 
 ## # Installing packages --------------------------------------------------------
-## - Installing readr ...                          OK [copied from cache in 0.24s]
-## Successfully installed 1 package in 0.28 seconds.</code></pre>
+## - Installing readr ...                          OK [linked from cache]
+## Successfully installed 1 package in 40 milliseconds.</code></pre>
 <pre class="r"><code>install.packages(&quot;dplyr&quot;)</code></pre>
 <pre><code>## The following package(s) will be installed:
 ## - dplyr [1.1.4]
-## These packages will be installed into &quot;E:/Nam_Hoc_2023-2024/R/Project_R/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
+## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
 ## 
 ## # Installing packages --------------------------------------------------------
-## - Installing dplyr ...                          OK [copied from cache in 0.36s]
-## Successfully installed 1 package in 0.39 seconds.</code></pre>
+## - Installing dplyr ...                          OK [linked from cache]
+## Successfully installed 1 package in 16 milliseconds.</code></pre>
 <pre class="r"><code>install.packages(&quot;tidyr&quot;)</code></pre>
 <pre><code>## The following package(s) will be installed:
 ## - tidyr [1.3.0]
-## These packages will be installed into &quot;E:/Nam_Hoc_2023-2024/R/Project_R/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
+## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
 ## 
 ## # Installing packages --------------------------------------------------------
-## - Installing tidyr ...                          OK [copied from cache in 0.36s]
-## Successfully installed 1 package in 0.4 seconds.</code></pre>
+## - Installing tidyr ...                          OK [linked from cache]
+## Successfully installed 1 package in 16 milliseconds.</code></pre>
 <pre class="r"><code>install.packages(&quot;ggplot2&quot;)</code></pre>
 <pre><code>## The following package(s) will be installed:
 ## - ggplot2 [3.4.4]
-## These packages will be installed into &quot;E:/Nam_Hoc_2023-2024/R/Project_R/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
+## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
 ## 
 ## # Installing packages --------------------------------------------------------
-## - Installing ggplot2 ...                        OK [copied from cache in 0.24s]
-## Successfully installed 1 package in 0.28 seconds.</code></pre>
-<pre class="r"><code>library(readr)
-library(dplyr)</code></pre>
+## - Installing ggplot2 ...                        OK [linked from cache]
+## Successfully installed 1 package in 16 milliseconds.</code></pre>
+<pre class="r"><code>  library(readr)
+  library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;dplyr&#39;</code></pre>
 <pre><code>## The following objects are masked from &#39;package:stats&#39;:
@@ -409,8 +409,8 @@ library(dplyr)</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(tidyr)
-library(ggplot2)</code></pre>
+<pre class="r"><code>  library(tidyr)
+  library(ggplot2)</code></pre>
 <div id="step-1-importing-diabetes-data-from-google-drive" class="section level2">
 <h2><strong>STEP-1 : Importing Diabetes Data from Google
 Drive</strong></h2>
@@ -432,6 +432,8 @@ head(diabetes)</code></pre>
 ## 4                    0.167  21       0
 ## 5                    2.288  33       1
 ## 6                    0.201  30       0</code></pre>
+<pre class="r"><code>dim(diabetes)</code></pre>
+<pre><code>## [1] 768   9</code></pre>
 </div>
 <div id="overall-of-dataset-dữ-liệu-y-tế-và-nhân-khẩu-học-của-phụ-nữ-để-dự-đoán-bệnh-tiểu-đường" class="section level2">
 <h2><strong>Overall of dataset:</strong> Dữ liệu y tế và nhân khẩu học
@@ -606,9 +608,6 @@ head(diabetes_scale)</code></pre>
 ## 4       0
 ## 5       1
 ## 6       0</code></pre>
-<p><em>Huyết áp và độ dày của da ít thay đổi với bệnh tiểu đường, chúng
-sẽ bị loại khỏi mô hình. Các biến khác ít nhiều cho thấy mối tương quan
-với bệnh tiểu đường nên sẽ được giữ nguyên</em></p>
 </div>
 <div id="predicting-diabetes-using-logarithmic-regression-model" class="section level3">
 <h3>PREDICTING DIABETES using Logarithmic Regression model</h3>
@@ -731,6 +730,7 @@ dụng 1 trong 2 để hạn chế tình trạng đa cộng tuyến
 <div id="chia-tập-dữ-liệu-thành-2-tập-train-và-test" class="section level4">
 <h4>Chia tập dữ liệu thành 2 tập train và test</h4>
 <pre class="r"><code>library(caret)</code></pre>
+<pre><code>## Warning: package &#39;caret&#39; was built under R version 4.3.2</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;lattice&#39;</code></pre>
@@ -1032,11 +1032,11 @@ str(train)</code></pre>
 <pre class="r"><code>install.packages(&quot;randomForest&quot;)</code></pre>
 <pre><code>## The following package(s) will be installed:
 ## - randomForest [4.7-1.1]
-## These packages will be installed into &quot;E:/Nam_Hoc_2023-2024/R/Project_R/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
+## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
 ## 
 ## # Installing packages --------------------------------------------------------
-## - Installing randomForest ...                   OK [copied from cache in 0.26s]
-## Successfully installed 1 package in 0.3 seconds.</code></pre>
+## - Installing randomForest ...                   OK [linked from cache]
+## Successfully installed 1 package in 19 milliseconds.</code></pre>
 <pre class="r"><code>library(randomForest) </code></pre>
 <pre><code>## randomForest 4.7-1.1</code></pre>
 <pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
@@ -1115,28 +1115,36 @@ model</code></pre>
 <div id="xác-thực-mô-hình-của-chúng-tôi-bằng-cách-sử-dụng-dữ-liệu-thử-nghiệm" class="section level3">
 <h3>Xác thực mô hình của chúng tôi bằng cách sử dụng dữ liệu thử
 nghiệm</h3>
-<pre class="r"><code>prediction &lt;- predict(model, newdata = test)
+<pre class="r"><code>prediction_test &lt;- predict(model, newdata = test)
+prediction_train &lt;- predict(model, newdata = train)
 
-table(prediction, test$BMI_Category)</code></pre>
-<pre><code>##              
-## prediction    Underweight Normal Overweight Obese
-##   Underweight           3      0          0     0
-##   Normal                2     30          0     0
-##   Overweight            0      0         51     0
-##   Obese                 0      0          0   142</code></pre>
+table(prediction_train, train$BMI_Category)</code></pre>
+<pre><code>##                 
+## prediction_train Underweight Normal Overweight Obese
+##      Underweight          10      0          0     0
+##      Normal                0     71          0     0
+##      Overweight            0      0        128     0
+##      Obese                 0      0          0   323</code></pre>
+<pre class="r"><code>table(prediction_test, test$BMI_Category)</code></pre>
+<pre><code>##                
+## prediction_test Underweight Normal Overweight Obese
+##     Underweight           3      0          0     0
+##     Normal                2     30          0     0
+##     Overweight            0      0         51     0
+##     Obese                 0      0          0   142</code></pre>
 </div>
 <div id="hiển-thị-giá-trị-dự-đoán-so-với-giá-trị-thực-tế" class="section level3">
 <h3>Hiển thị giá trị dự đoán so với giá trị thực tế</h3>
-<pre class="r"><code>results&lt;-cbind(prediction,test$BMI_Category)
+<pre class="r"><code>results&lt;-cbind(prediction_test, test$BMI_Category)
 
 head(results)</code></pre>
-<pre><code>##    prediction  
-## 2           3 3
-## 5           4 4
-## 6           3 3
-## 7           4 4
-## 11          4 4
-## 14          4 4</code></pre>
+<pre><code>##    prediction_test  
+## 2                3 3
+## 5                4 4
+## 6                3 3
+## 7                4 4
+## 11               4 4
+## 14               4 4</code></pre>
 <pre class="r"><code>colnames(results)&lt;-c(&#39;pred&#39;,&#39;real&#39;)
 
 results&lt;-as.data.frame(results)
@@ -1145,9 +1153,13 @@ View(results)</code></pre>
 </div>
 <div id="tính-độ-chính-xác-của-mô-hình" class="section level3">
 <h3>Tính độ chính xác của mô hình</h3>
-<pre class="r"><code>accuracy &lt;- mean(prediction == test$BMI_Category)
-accuracy</code></pre>
-<pre><code>## [1] 0.9912281</code></pre>
+<pre class="r"><code>accuracy_test &lt;- mean(prediction_test == test$BMI_Category)
+accuracy_train &lt;- mean(prediction_train == train$BMI_Category)
+
+paste(&quot;độ chính xác trên tập train: &quot;, accuracy_train)</code></pre>
+<pre><code>## [1] &quot;độ chính xác trên tập train:  1&quot;</code></pre>
+<pre class="r"><code>paste(&quot;độ chính xác trên tập test: &quot;, accuracy_test)</code></pre>
+<pre><code>## [1] &quot;độ chính xác trên tập test:  0.991228070175439&quot;</code></pre>
 <p>Bạn có thể thấy rằng độ chính xác của mô hình này là khoảng 99-100
 (%), điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình
 dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình

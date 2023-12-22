@@ -589,15 +589,17 @@ model
 ### Xác thực mô hình của chúng tôi bằng cách sử dụng dữ liệu thử nghiệm
 
 ```{r}
-prediction <- predict(model, newdata = test)
+prediction_test <- predict(model, newdata = test)
+prediction_train <- predict(model, newdata = train)
 
-table(prediction, test$BMI_Category)
+table(prediction_train, train$BMI_Category)
+table(prediction_test, test$BMI_Category)
 ```
 
 ### Hiển thị giá trị dự đoán so với giá trị thực tế
 
 ```{r}
-results<-cbind(prediction,test$BMI_Category)
+results<-cbind(prediction_test, test$BMI_Category)
 
 head(results)
 ```
@@ -613,8 +615,11 @@ View(results)
 ### Tính độ chính xác của mô hình
 
 ```{r}
-accuracy <- mean(prediction == test$BMI_Category)
-accuracy
+accuracy_test <- mean(prediction_test == test$BMI_Category)
+accuracy_train <- mean(prediction_train == train$BMI_Category)
+
+paste("độ chính xác trên tập train: ", accuracy_train)
+paste("độ chính xác trên tập test: ", accuracy_test)
 ```
 
 Bạn có thể thấy rằng độ chính xác của mô hình này là khoảng 99-100 (%), điều này thật tuyệt vời. Bây giờ chúng tôi đã tự động hóa quá trình dự đoán loại cân nặng. Điều này đưa chúng ta đến khả năng theo dõi tình trạng sức khỏa của bệnh nhân và đưa ra chuẩn đoán sớm
