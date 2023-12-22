@@ -201,6 +201,8 @@ diabetes_f<-diabetes_filter
 ```{r}
 diabetes_f $BloodPressure <- NULL
 diabetes_f $SkinThickness <- NULL
+
+dim(diabetes_f)
 ```
 
 *Chuẩn hoá dữ liệu về một thang đo chung*
@@ -233,7 +235,7 @@ summary(model)
 ```
 
 *"Ba thuộc tính phù hợp nhất, 'Glucose', 'BMI' và 'Mang thai' có giá trị
-p thấp, cho thấy mức ý nghĩa cao. Điều này cho thấy rằng các biến độc
+p thấp.Điều này cho thấy rằng các biến độc
 lập này ảnh hưởng đáng kể đến hiệu suất của mô hình hồi quy logistic
 trong dự đoán 'Kết quả.'*
 
@@ -247,12 +249,12 @@ anova(model, test="Chisq")
 của deviance (độ lệch) khi thêm vào từng biến độc lập vào mô hình*
 
 *Từ bảng độ lệch, chúng ta có thể thấy rằng việc bổ sung insulin và tuổi
-tác ít ảnh hưởng đến độ lệch còn lại.*
+tác ít ảnh hưởng đến độ lệch *
 
 ###Cross Validation
 
-*Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh
-,0: không mắc bệnh* *Tính toán ma trận nhầm lẫn*
+*Bắt đầu nhận dạng và chuyển đổi xác suất thành nhãn dự đoán 1: mắc bệnh,0: không mắc bệnh *
+*Tính toán ma trận nhầm lẫn*
 
 ```{r}
 fitted.results <- predict(model,newdata=test,type='response')
