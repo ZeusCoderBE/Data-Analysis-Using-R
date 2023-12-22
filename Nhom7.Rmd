@@ -219,10 +219,15 @@ dim(diabetes_f)
 
 ### Chuẩn hoá dữ liệu 
 
-#### Phương pháp chuẩn hoá dữ liệu bằng MinMax-Scaler 
+#### Phương pháp chuẩn hoá dữ liệu bằng MinMax-Scaler
 
--   *Đảm bảo rằng các biến có thang đo đồng nhất.Miền giá trị nằm trong
-    khoảng (0-1), giúp mô hình học tốt hơn.*
+#### Mục đích
+
+-   *Đảm bảo rằng các biến có thang đo đồng nhất.*
+
+-   *Miền giá trị nằm trong Khoảng (0-1).*
+
+-   *Giúp mô hình học tốt hơn.*
 
 -   *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
 
@@ -281,7 +286,7 @@ fitted.results <- ifelse(fitted.results > 0.5,1,0)
 
 ```
 
-#### Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*
+#### Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu
 
 ```{r}
 TP <- conf_matrix_logi[2, 2]  # True Positive
