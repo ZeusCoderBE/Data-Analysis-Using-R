@@ -25,18 +25,18 @@
 <h3>**Chuẩn bị các thư viện**</h3>
 
 ```{r}
-install.packages("readr")
-install.packages("dplyr")
-install.packages("tidyr")
-install.packages("ggplot2")
+#install.packages("readr")
+#install.packages("dplyr")
+#install.packages("tidyr")
+#install.packages("ggplot2")
 ```
 
  
 ```{r}
-  library(readr)
-  library(dplyr)
-  library(tidyr)
-  library(ggplot2)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 ```
 
 ## **STEP-1 : Importing Diabetes Data from Google Drive**
@@ -47,8 +47,6 @@ install.packages("ggplot2")
 diabetes <- read.csv("https://drive.google.com/uc?id=15mjrv0LV2T6GWNdAuW-QhXVdtMkQALlh")
 # Hiển thị dữ liệu
 head(diabetes)
-dim(diabetes)
-
 ```
 
 ## **Overall of dataset:** Dữ liệu y tế và nhân khẩu học của phụ nữ để dự đoán bệnh tiểu đường
@@ -484,12 +482,8 @@ ggplot(diabetes_filter, aes(x = BMI_Category)) +
 
 ```{r}
 num_diabetes <- diabetes_filter
-
-num_diabetes$BMI_Category <- cut(diabetes_filter$BMI, 
-                             breaks = c(-Inf, 18.5, 24.9, 29.9, Inf), 
-                             labels = c(0, 1, 2, 3))
-
 num_diabetes$BMI_Category <- as.integer(num_diabetes$BMI_Category)
+str(num_diabetes)
 ```
 
 *Tìm các biến độc lập so với biến phụ thuộc BMI_Category*
@@ -539,7 +533,6 @@ str(train)
 ```
 
 ```{r}
-install.packages("randomForest")
 library(randomForest) 
 ```
 

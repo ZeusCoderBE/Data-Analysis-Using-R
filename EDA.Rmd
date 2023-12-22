@@ -17,10 +17,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Installing module
 ```{r}
-install.packages('reader')
-install.packages("lattice")
-install.packages("reshape2")
-install.packages('ggplot2')
+#install.packages('reader')
+#install.packages("lattice")
+#install.packages("reshape2")
+#install.packages('ggplot2')
 ```
 
 ## Exploring data
@@ -81,7 +81,7 @@ library(gridExtra)
 ```
 
 ```{r}
-par(mfrow=c(1,3))
+par(mfrow=c(1,4))
 # Boxplot cho Age
 boxplot(diabetes$Age,
         col="#ff0066",
@@ -91,6 +91,9 @@ boxplot(diabetes$Age,
 boxplot(diabetes$Pregnancies,
         col="yellow",
         main="Boxplot for Pregnancy")
+
+# Boxplot cho Pregnancies
+barplot(table(diabetes$Outcome), main = "Barplot of Out come", xlab = "Outcome", ylab="Count")
 
 plot(density(diabetes$Glucose),
      col="yellow",
@@ -102,6 +105,7 @@ polygon(density(diabetes$Glucose),
 
 box(which = "outer", lty = "solid")
 ```
+
 Ta có thể thấy:
 
 * Từ boxplot về độ tuổi, cho thấy rằng phụ nữ trong tập dữ liệu tập trung chủ yếu ở khoảng 25-41 tuổi
@@ -115,7 +119,7 @@ Ta có thể thấy:
 
 ```{r}
 par(mfrow=c(1,2))
-plot(diabetes$Insulin, diabetes$Glucose, type='p', col=c("red"), pch=20, main="Tương quan giữa Glucose và Insulin")
+plot(diabetes$Insulin, diabetes$Glucose, xlab="Insulin", ylab="Glucose", type='p', col=c("red"), pch=20, main="Tương quan giữa Glucose và Insulin")
 
 # Boxplot cho Outcome và Glucose theo người mắc bệnh và không
 diabetes_groups <- cut(diabetes$Outcome, c(-Inf, 0, Inf), labels = c("Không bệnh", "Bệnh"))

@@ -367,40 +367,12 @@ display: none;
 <h3>
 <strong>Chuẩn bị các thư viện</strong>
 </h3>
-<pre class="r"><code>install.packages(&quot;readr&quot;)</code></pre>
-<pre><code>## The following package(s) will be installed:
-## - readr [2.1.4]
-## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
-## 
-## # Installing packages --------------------------------------------------------
-## - Installing readr ...                          OK [linked from cache]
-## Successfully installed 1 package in 40 milliseconds.</code></pre>
-<pre class="r"><code>install.packages(&quot;dplyr&quot;)</code></pre>
-<pre><code>## The following package(s) will be installed:
-## - dplyr [1.1.4]
-## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
-## 
-## # Installing packages --------------------------------------------------------
-## - Installing dplyr ...                          OK [linked from cache]
-## Successfully installed 1 package in 16 milliseconds.</code></pre>
-<pre class="r"><code>install.packages(&quot;tidyr&quot;)</code></pre>
-<pre><code>## The following package(s) will be installed:
-## - tidyr [1.3.0]
-## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
-## 
-## # Installing packages --------------------------------------------------------
-## - Installing tidyr ...                          OK [linked from cache]
-## Successfully installed 1 package in 16 milliseconds.</code></pre>
-<pre class="r"><code>install.packages(&quot;ggplot2&quot;)</code></pre>
-<pre><code>## The following package(s) will be installed:
-## - ggplot2 [3.4.4]
-## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
-## 
-## # Installing packages --------------------------------------------------------
-## - Installing ggplot2 ...                        OK [linked from cache]
-## Successfully installed 1 package in 16 milliseconds.</code></pre>
-<pre class="r"><code>  library(readr)
-  library(dplyr)</code></pre>
+<pre class="r"><code>#install.packages(&quot;readr&quot;)
+#install.packages(&quot;dplyr&quot;)
+#install.packages(&quot;tidyr&quot;)
+#install.packages(&quot;ggplot2&quot;)</code></pre>
+<pre class="r"><code>library(readr)
+library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;dplyr&#39;</code></pre>
 <pre><code>## The following objects are masked from &#39;package:stats&#39;:
@@ -409,8 +381,8 @@ display: none;
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>  library(tidyr)
-  library(ggplot2)</code></pre>
+<pre class="r"><code>library(tidyr)
+library(ggplot2)</code></pre>
 <div id="step-1-importing-diabetes-data-from-google-drive" class="section level2">
 <h2><strong>STEP-1 : Importing Diabetes Data from Google
 Drive</strong></h2>
@@ -432,8 +404,6 @@ head(diabetes)</code></pre>
 ## 4                    0.167  21       0
 ## 5                    2.288  33       1
 ## 6                    0.201  30       0</code></pre>
-<pre class="r"><code>dim(diabetes)</code></pre>
-<pre><code>## [1] 768   9</code></pre>
 </div>
 <div id="overall-of-dataset-dữ-liệu-y-tế-và-nhân-khẩu-học-của-phụ-nữ-để-dự-đoán-bệnh-tiểu-đường" class="section level2">
 <h2><strong>Overall of dataset:</strong> Dữ liệu y tế và nhân khẩu học
@@ -968,12 +938,19 @@ following BMI ranges:</p>
 <p><em>Tạo một dataframe bản sao với BMI_Category đã được số
 hóa</em></p>
 <pre class="r"><code>num_diabetes &lt;- diabetes_filter
-
-num_diabetes$BMI_Category &lt;- cut(diabetes_filter$BMI, 
-                             breaks = c(-Inf, 18.5, 24.9, 29.9, Inf), 
-                             labels = c(0, 1, 2, 3))
-
-num_diabetes$BMI_Category &lt;- as.integer(num_diabetes$BMI_Category)</code></pre>
+num_diabetes$BMI_Category &lt;- as.integer(num_diabetes$BMI_Category)
+str(num_diabetes)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    760 obs. of  10 variables:
+##  $ Pregnancies             : int  6 1 8 1 0 5 3 10 2 8 ...
+##  $ Glucose                 : int  148 85 183 89 137 116 78 115 197 125 ...
+##  $ BloodPressure           : int  72 66 64 66 40 74 50 0 70 96 ...
+##  $ SkinThickness           : int  35 29 0 23 35 0 32 0 45 0 ...
+##  $ Insulin                 : int  0 0 0 94 168 0 88 0 543 0 ...
+##  $ BMI                     : num  33.6 26.6 23.3 28.1 43.1 25.6 31 35.3 30.5 0 ...
+##  $ DiabetesPedigreeFunction: num  0.627 0.351 0.672 0.167 2.288 ...
+##  $ Age                     : int  50 31 32 21 33 30 26 29 53 54 ...
+##  $ Outcome                 : int  1 0 1 0 1 0 1 0 1 1 ...
+##  $ BMI_Category            : int  4 3 2 3 4 3 4 4 4 1 ...</code></pre>
 <p><em>Tìm các biến độc lập so với biến phụ thuộc BMI_Category</em></p>
 <pre class="r"><code>library(lattice)
 library(reshape2)</code></pre>
@@ -1029,14 +1006,6 @@ str(train)</code></pre>
 ##  $ Age                     : int  39 67 28 22 44 51 47 57 25 44 ...
 ##  $ Outcome                 : int  0 0 0 0 1 0 1 1 0 1 ...
 ##  $ BMI_Category            : Factor w/ 4 levels &quot;Underweight&quot;,..: 4 3 4 4 3 3 4 4 4 4 ...</code></pre>
-<pre class="r"><code>install.packages(&quot;randomForest&quot;)</code></pre>
-<pre><code>## The following package(s) will be installed:
-## - randomForest [4.7-1.1]
-## These packages will be installed into &quot;C:/Education/Uni/Statistic with R/Final_Project/R-diabetes/Data-Analysis-Using-R/renv/library/R-4.3/x86_64-w64-mingw32&quot;.
-## 
-## # Installing packages --------------------------------------------------------
-## - Installing randomForest ...                   OK [linked from cache]
-## Successfully installed 1 package in 19 milliseconds.</code></pre>
 <pre class="r"><code>library(randomForest) </code></pre>
 <pre><code>## randomForest 4.7-1.1</code></pre>
 <pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
