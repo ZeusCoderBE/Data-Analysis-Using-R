@@ -219,10 +219,15 @@ dim(diabetes_f)
 
 ### Chuẩn hoá dữ liệu 
 
-#### Phương pháp chuẩn hoá dữ liệu bằng MinMax-Scaler 
+#### Phương pháp chuẩn hoá dữ liệu bằng MinMax-Scaler
 
--   *Đảm bảo rằng các biến có thang đo đồng nhất.Miền giá trị nằm trong
-    khoảng (0-1), giúp mô hình học tốt hơn.*
+#### Mục đích
+
+-   *Đảm bảo rằng các biến có thang đo đồng nhất.*
+
+-   *Miền giá trị nằm trong Khoảng (0-1).*
+
+-   *Giúp mô hình học tốt hơn.*
 
 -   *Giảm ảnh hưởng của biên độ lớn giữa các biến.*
 
@@ -281,7 +286,7 @@ fitted.results <- ifelse(fitted.results > 0.5,1,0)
 
 ```
 
-#### Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*
+#### Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu
 
 ```{r}
 TP <- conf_matrix_logi[2, 2]  # True Positive
@@ -453,13 +458,18 @@ rpart.plot(model)
 accuracy()
 thongso()
 ```
+#### So sánh hiệu suất của mô hình hồi quy logistic với mô hình cây quyết định ta thấy :
+-> *Hai mô hình cho thấy độ chính xác và độ đặc hiệu khá giống nhau *
+-> *Nhưng độ nhạy lại khác nhau.Mô hình hồi quy logistic có độ nhạy lớn hơn cho thấy mô hình nhận dạng các trường hợp bị bệnh chính xác hơn*
+
+-> *Đối với các bài toán dự báo bệnh thì độ nhạy lớn sẽ tốt hơn. Điều này là do độ nhạy là thước đo về mức độ tốt của mô hình trong việc dự đoán các trường hợp dương tính. Trong các bài toán dự báo bệnh, việc xác định chính xác các trường hợp mắc bệnh là rất quan trọng. Nếu mô hình có độ nhạy thấp, thì mô hình sẽ có xu hướng bỏ sót các trường hợp mắc bệnh, điều này có thể dẫn đến việc điều trị sai hoặc không điều trị. *
+
 ##### Trích xuất các luật từ cây quyết định
 Xem quy luật của mô hình cây quyết định
 ```{r}
 rules <- rpart.rules(model)
 print(rules)
 ```
-
 ### Classifying the categories of Mass (BMI) using Random Forest model
 
 The World Health Organization (WHO) classifies adults based on the

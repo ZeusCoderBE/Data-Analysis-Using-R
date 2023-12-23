@@ -593,9 +593,13 @@ dim(diabetes_f)</code></pre>
 <h3>Chuẩn hoá dữ liệu</h3>
 <div id="phương-pháp-chuẩn-hoá-dữ-liệu-bằng-minmax-scaler" class="section level4">
 <h4>Phương pháp chuẩn hoá dữ liệu bằng MinMax-Scaler</h4>
+</div>
+<div id="mục-đích" class="section level4">
+<h4>Mục đích</h4>
 <ul>
-<li><p><em>Đảm bảo rằng các biến có thang đo đồng nhất.Miền giá trị nằm
-trong khoảng (0-1), giúp mô hình học tốt hơn.</em></p></li>
+<li><p><em>Đảm bảo rằng các biến có thang đo đồng nhất.</em></p></li>
+<li><p><em>Miền giá trị nằm trong Khoảng (0-1).</em></p></li>
+<li><p><em>Giúp mô hình học tốt hơn.</em></p></li>
 <li><p><em>Giảm ảnh hưởng của biên độ lớn giữa các biến.</em></p></li>
 </ul>
 </div>
@@ -721,7 +725,7 @@ fitted.results &lt;- ifelse(fitted.results &gt; 0.5,1,0)
 ##              1  16  45</code></pre>
 </div>
 <div id="tính-toán-độ-chính-xác-toàn-thểđộ-nhạyđộ-đặc-hiệu" class="section level4">
-<h4>Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*</h4>
+<h4>Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu</h4>
 <pre class="r"><code>TP &lt;- conf_matrix_logi[2, 2]  # True Positive
 TN &lt;- conf_matrix_logi[1, 1]  # True Negative
 FP &lt;- conf_matrix_logi[1, 2]  # False Positive
@@ -768,7 +772,6 @@ dụng 1 trong 2 để hạn chế tình trạng đa cộng tuyến
 <div id="chia-tập-dữ-liệu-thành-2-tập-train-và-test" class="section level4">
 <h4>Chia tập dữ liệu thành 2 tập train và test</h4>
 <pre class="r"><code>library(caret)</code></pre>
-<pre><code>## Warning: package &#39;caret&#39; was built under R version 4.3.2</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;lattice&#39;</code></pre>
