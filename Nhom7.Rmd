@@ -576,9 +576,12 @@ error_out_of_bag <- c()
 for (ntree in 1:100) {
     # Huấn luyện mô hình
     model <- randomForest(BMI_Category ~ . -Age -Pregnancies, data = train, ntree = ntree, mtry=3)
-
+    
+    # Tạo tập oob
+    oob <- sample(nrow(train), 0.3 * nrow(train))
+    
     # Tính lỗi out_of_bag
-    error_out_of_bag[ntree] <- mean(predict(model, train) != train$BMI_Category)
+    error_out_of_bag[ntree] <- mean(predict(model, train[oob,]) != train[oob,]$BMI_Category)
 }
 
 # Vẽ đường cong lỗi
