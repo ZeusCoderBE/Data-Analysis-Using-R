@@ -725,7 +725,7 @@ fitted.results &lt;- ifelse(fitted.results &gt; 0.5,1,0)
 ##              1  16  45</code></pre>
 </div>
 <div id="tính-toán-độ-chính-xác-toàn-thểđộ-nhạyđộ-đặc-hiệu" class="section level4">
-<h4>Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu*</h4>
+<h4>Tính toán độ chính xác toàn thể,độ nhạy,độ đặc hiệu</h4>
 <pre class="r"><code>TP &lt;- conf_matrix_logi[2, 2]  # True Positive
 TN &lt;- conf_matrix_logi[1, 1]  # True Negative
 FP &lt;- conf_matrix_logi[1, 2]  # False Positive
